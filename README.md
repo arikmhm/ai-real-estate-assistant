@@ -1,6 +1,6 @@
 # AI Real Estate Assistant
 
-Platform satu agensi properti untuk katalog publik dan operasi admin/sales. Saat ini proyek berada pada **tahap 0 (fondasi)**: Laravel 13, starter kit Livewire resmi, PostgreSQL, dan autentikasi internal. Kebutuhan produk ada di [PRD](docs/PRD.md); urutan implementasi ada di [roadmap](docs/EXECUTION_ROADMAP.md#titik-lanjut).
+Platform satu agensi properti untuk katalog publik dan operasi admin/sales. Saat ini proyek berada pada **tahap 0 (fondasi)**: Laravel 13, starter kit Livewire resmi, PostgreSQL, dan autentikasi internal. Dokumen kebutuhan, arsitektur, dan roadmap disimpan hanya pada lingkungan kerja lokal.
 
 ## Prasyarat
 
