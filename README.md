@@ -45,7 +45,20 @@ Untuk melihat media pada lingkungan lokal, jalankan perintah berikut sekali sete
 php artisan storage:link
 ```
 
-Unggahan listing memakai `PROPERTY_MEDIA_DISK=public` pada `.env` lokal. Untuk bucket R2 development, gunakan `PROPERTY_MEDIA_DISK=r2` serta isi `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT`, dan `R2_PUBLIC_URL` hanya di `.env` lingkungan. URL development dapat memakai domain `r2.dev` yang diaktifkan pada bucket; produksi memakai custom domain. Pembersihan objek yatim dapat dipratinjau dengan `php artisan listings:prune-media --disk=public`, lalu dijalankan dengan opsi `--delete` setelah hasilnya diperiksa. Untuk R2, ganti `--disk=r2` setelah koneksi tersedia. Kredensial dan uji unggah R2 langsung belum tersedia pada pemeriksaan ini.
+Unggahan listing memakai `PROPERTY_MEDIA_DISK=public` untuk disk lokal atau `PROPERTY_MEDIA_DISK=r2` untuk Cloudflare R2. Pada `.env` lingkungan R2, isi `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT` (endpoint S3 sesuai yurisdiksi bucket), dan `R2_PUBLIC_URL`. Untuk bucket development yang sudah diuji, gunakan `R2_BUCKET=ai-real-estate-assistant` dan `R2_PUBLIC_URL=https://ai-real-estate-assistant-storage.arikmhm.com`. Gunakan **Access Key ID** dan **Secret Access Key** dari token R2 dengan izin Object Read & Write untuk bucket ini; **Token value** Cloudflare API tidak dipakai Laravel. Simpan kredensial hanya di `.env`, jalankan `php artisan config:clear`, lalu mulai ulang server Laravel setelah konfigurasi berubah. Objek otomatis memakai prefix `listings/{id}/`, sehingga folder tidak perlu dibuat. URL media pada custom domain bersifat publik, termasuk untuk listing yang masih draf.
+
+Pratinjau objek yatim dengan `php artisan listings:prune-media --disk=public` atau `php artisan listings:prune-media --disk=r2`; gunakan opsi `--delete` hanya setelah hasil pratinjau diperiksa. Pada 27 Oktober 2026, unggah foto/denah, URL custom domain, penggantian, penghapusan, dan pratinjau pemangkasan disk R2 development berhasil diuji memakai listing sintetis.
+
+Untuk unggah melalui browser, batas PHP harus mencakup ukuran file dan jumlah seluruh file dalam satu pilihan. Di lingkungan development Herd Lite yang diuji pada 27 Oktober 2026, file `$HOME/.config/herd-lite/bin/php.ini` memakai `upload_max_filesize=16M` dan `post_max_size=256M`; aturan aplikasi tetap maksimal 10 MB per foto/denah. Periksa runtime dengan `$HOME/.config/herd-lite/bin/php --ini` dan `$HOME/.config/herd-lite/bin/php -i | grep -E 'upload_max_filesize|post_max_size'`, lalu mulai ulang server Laravel setelah mengubah `php.ini`. Sebelum penyesuaian, PHP membatasi 2 MB per file dan 8 MB per request sehingga upload browser gagal sebelum mencapai R2. Foto sintetis 3,27 MB berhasil diunggah dari editor admin ke R2 dan URL publiknya merespons HTTP 200 setelah penyesuaian.
+
+Untuk mengisi katalog development dengan delapan listing sintetis Kudus, pastikan `.env` memakai `APP_ENV=local` dan `PROPERTY_MEDIA_DISK=r2` beserta konfigurasi R2 di atas. Jalankan pemeriksaan tanpa perubahan, lalu impor:
+
+```bash
+php artisan demo:import-kudus --check
+php artisan demo:import-kudus --apply
+```
+
+Perintah `--check` memeriksa manifest, 32 WebP, database, dan koneksi R2 tanpa unggah. `--apply` menyimpan tiap listing sebagai draf, mengunggah tiga foto dan satu denah, lalu menerbitkannya. Jalankan `--apply` lagi untuk melanjutkan listing parsial tanpa menggandakan atau mengubah listing yang lengkap, termasuk status terjual. Bila sebuah listing memiliki media tambahan manual, impor berhenti untuk listing itu agar media tidak terhapus. Setelah mengubah aset sumber, gunakan `php artisan demo:import-kudus --apply --replace` untuk mengganti media kedelapan listing melalui layanan media aplikasi; tinjau perubahan manual terlebih dahulu. Aset dan manifest ada di `database/demo/kudus/`. Dataset ini hanya untuk development; URL gambar pada custom domain R2 dapat diakses publik.
 
 ## Tes dan pemeriksaan
 
@@ -61,7 +74,7 @@ docker compose exec -T db psql -U real_estate -d real_estate -c 'CREATE DATABASE
 composer test
 ```
 
-Perintah ini menjalankan Pint, PHPStan, dan tes PHPUnit. Pemeriksaan tahap 2 pada 27 Oktober 2026: 87 tes/319 assertion lulus, build frontend lulus, dan tujuh migrasi PostgreSQL berstatus `Ran`. Perintah pratinjau `php artisan listings:prune-media --disk=public` juga berhasil dan menemukan 0 objek yatim. PHPStan dapat menampilkan peringatan ekstensi turbo pada PHP Herd Lite berbasis musl; pemeriksaannya tetap lulus.
+Perintah ini menjalankan Pint, PHPStan, dan tes PHPUnit. Pemeriksaan tahap 2 pada 27 Oktober 2026: 87 tes/319 assertion lulus, build frontend lulus, dan tujuh migrasi PostgreSQL berstatus `Ran`. Pemeriksaan data demo Kudus pada tanggal yang sama: 97 tes/405 assertion lulus; impor menghasilkan 8 listing terbit, 24 foto, 8 denah, dan 32 objek R2 WebP. Perintah pratinjau `php artisan listings:prune-media --disk=public` juga berhasil dan menemukan 0 objek yatim. PHPStan dapat menampilkan peringatan ekstensi turbo pada PHP Herd Lite berbasis musl; pemeriksaannya tetap lulus.
 
 ## Referensi Laravel resmi
 
