@@ -1,6 +1,6 @@
 # AI Real Estate Assistant
 
-Platform satu agensi properti untuk katalog publik dan operasi admin/sales. Saat ini proyek berada pada **tahap 0 (fondasi)**: Laravel 13, starter kit Livewire resmi, PostgreSQL, dan autentikasi internal. Dokumen kebutuhan, arsitektur, dan roadmap disimpan hanya pada lingkungan kerja lokal.
+Platform satu agensi properti untuk katalog publik dan operasi admin/sales. Tahap 1 menambahkan peran, pembatasan akses, dan pengelolaan akun sales pada fondasi Laravel 13, Livewire, dan PostgreSQL. Dokumen kebutuhan, arsitektur, dan roadmap disimpan hanya pada lingkungan kerja lokal.
 
 ## Prasyarat
 
@@ -29,7 +29,13 @@ php artisan serve
 
 Aplikasi terbuka pada `http://127.0.0.1:8000`. Database lokal di `127.0.0.1:55432`; nilai di `compose.yaml` dan `.env.example` hanya untuk pengembangan lokal. Sesuaikan `.env` jika port atau kredensial lokal berubah. File `.env` diabaikan Git.
 
-Starter kit menyediakan login, reset kata sandi, verifikasi email, dan pengaturan akun. Pendaftaran publik dinonaktifkan. Akun staf dan hak akses admin/sales akan diterapkan pada tahap 1.
+Pendaftaran publik dinonaktifkan. Buat admin pertama dari terminal interaktif setelah migrasi:
+
+```bash
+php artisan users:create-admin
+```
+
+Perintah meminta nama, email unik, dan kata sandi secara tersembunyi. Jangan memasukkan kata sandi ke argumen shell atau file repository. Admin masuk melalui `/login`, lalu mengelola sales pada `/staff`. Saat membuat sales, admin mengisi nomor WhatsApp dalam format internasional (misalnya `+628...`) dan kata sandi sementara yang disampaikan di luar aplikasi. Email kontak publik opsional. Akun nonaktif tidak dapat masuk; penonaktifan tidak menghapus akun. Sales dapat mengubah kata sandi dan pengaturan keamanan, sedangkan nama, email, dan kontaknya dikelola admin. Verifikasi email Fortify tetap tersedia tetapi bukan syarat akses akun yang dibuat admin, agar setup lokal tidak bergantung pada layanan email.
 
 ## Tes dan pemeriksaan
 
@@ -45,7 +51,7 @@ docker compose exec -T db psql -U real_estate -d real_estate -c 'CREATE DATABASE
 composer test
 ```
 
-Perintah ini menjalankan Pint, PHPStan, dan tes PHPUnit. Pemeriksaan terakhir: 34 tes/80 assertion lulus, build frontend lulus, dan lima migrasi PostgreSQL berstatus `Ran`. PHPStan dapat menampilkan peringatan ekstensi turbo pada PHP Herd Lite berbasis musl; pemeriksaannya tetap lulus.
+Perintah ini menjalankan Pint, PHPStan, dan tes PHPUnit. Pemeriksaan terakhir 27 Oktober 2026: 56 tes/160 assertion lulus, build frontend lulus, dan enam migrasi PostgreSQL berstatus `Ran`. PHPStan dapat menampilkan peringatan ekstensi turbo pada PHP Herd Lite berbasis musl; pemeriksaannya tetap lulus.
 
 ## Referensi Laravel resmi
 
