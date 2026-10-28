@@ -29,7 +29,7 @@ if (panel) {
         const anchor = document.createElement('a');
         anchor.href = url;
         anchor.textContent = label;
-        anchor.className = 'font-medium text-emerald-800 underline';
+        anchor.className = 'font-medium text-stone-950 underline underline-offset-2';
         anchor.rel = 'noopener';
         return anchor;
     };

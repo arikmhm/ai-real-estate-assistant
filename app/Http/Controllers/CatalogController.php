@@ -15,8 +15,17 @@ class CatalogController extends Controller
 {
     public function home(): View
     {
+        $cities = Listing::publicCatalog()->whereNotNull('city')->distinct()->orderBy('city')->pluck('city');
+
         return view('public.home', [
             'listings' => Listing::publicCatalog()->with('media')->latest()->limit(6)->get(),
+            'cities' => $cities,
+            'stats' => [
+                'listings' => Listing::publicCatalog()->count(),
+                'cities' => $cities->count(),
+                'types' => Listing::publicCatalog()->distinct()->count('type'),
+            ],
+            'salesContacts' => User::activeSales()->orderBy('name')->get(),
         ]);
     }
 

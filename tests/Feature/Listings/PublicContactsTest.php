@@ -32,6 +32,20 @@ class PublicContactsTest extends TestCase
         }
     }
 
+    public function test_home_lists_active_sales_with_generic_whatsapp_message_and_counts(): void
+    {
+        Listing::factory()->create(['publication_status' => 'published', 'city' => 'Kudus', 'type' => 'rumah']);
+        Listing::factory()->create(['publication_status' => 'published', 'city' => 'Jepara', 'type' => 'tanah']);
+        Listing::factory()->create(['publication_status' => 'published', 'availability_status' => 'sold', 'city' => 'Pati']);
+        User::factory()->create(['name' => 'Alya Puspitasari', 'whatsapp_number' => '+6281234567890', 'public_contact_approved' => true]);
+        User::factory()->create(['name' => 'Sales Nonaktif', 'is_active' => false, 'whatsapp_number' => '+628111111111', 'public_contact_approved' => true]);
+
+        $this->get('/')->assertOk()
+            ->assertSee('Alya Puspitasari')->assertDontSee('Sales Nonaktif')
+            ->assertSee('wa.me/6281234567890?text='.rawurlencode('Halo, saya ingin bertanya tentang properti di '.config('app.name').'.'), false)
+            ->assertSeeInOrder(['Properti tersedia', '>2</dd>', 'Kabupaten/kota', '>2</dd>'], false);
+    }
+
     public function test_detail_has_clear_empty_state_without_active_sales(): void
     {
         $listing = Listing::factory()->create(['publication_status' => 'published']);

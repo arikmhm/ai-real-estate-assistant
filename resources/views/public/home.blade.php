@@ -4,24 +4,170 @@
 @section('description', 'Lihat rumah, tanah, dan bangunan kos yang tersedia dari katalog agensi.')
 
 @section('content')
-    <section class="bg-stone-900 px-5 py-16 text-white md:py-24">
-        <div class="mx-auto max-w-7xl space-y-6">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-300">Rumah · Tanah · Kos</p>
-            <h1 class="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">Temukan properti yang sesuai dengan rencana Anda.</h1>
-            <p class="max-w-xl text-lg text-stone-300">Jelajahi pilihan yang tersedia dan lihat informasi terbarunya pada halaman detail.</p>
-            <a href="{{ route('properties.index') }}" class="inline-flex rounded-lg bg-emerald-400 px-6 py-3 font-semibold text-stone-950 hover:bg-emerald-300">Lihat semua properti</a>
+    {{-- Hero --}}
+    <section class="px-4 pt-4 md:px-8">
+        {{-- aset: foto hero. Saat foto dipasang, tambahkan overlay gelap dan ubah teks menjadi putih. --}}
+        <div class="relative mx-auto flex min-h-[26rem] max-w-7xl flex-col items-center justify-center rounded-3xl bg-stone-200 px-6 pb-24 pt-16 text-center md:min-h-[36rem]">
+            <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-600">Rumah · Tanah · Bangunan kos</p>
+            <h1 class="mt-5 max-w-3xl text-4xl font-medium leading-[1.05] tracking-tight md:text-6xl">Temukan properti yang sesuai dengan rencana Anda</h1>
+            <p class="mt-5 max-w-xl text-stone-600">Harga dan ketersediaan langsung dari data agensi. Pilih sales favorit Anda dan lanjutkan percakapan lewat WhatsApp.</p>
+            <a href="{{ route('properties.index') }}" class="mt-8 rounded-full bg-stone-950 px-6 py-3 text-sm font-medium text-white hover:bg-stone-800">Lihat properti</a>
         </div>
     </section>
-    <section class="mx-auto max-w-7xl space-y-7 px-5 py-12 md:px-8">
-        <div><h2 class="text-3xl font-semibold">Pilihan terbaru</h2><p class="mt-2 text-stone-600">Properti yang saat ini tersedia.</p></div>
+
+    {{-- Bar pencarian --}}
+    <section class="relative z-10 -mt-14 px-8 md:px-16">
+        <form method="GET" action="{{ route('properties.index') }}" aria-label="Pencarian cepat" class="mx-auto grid max-w-5xl gap-4 rounded-2xl border border-stone-200 bg-white p-4 shadow-xl shadow-stone-900/5 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,1fr))_auto] lg:items-end lg:gap-0 lg:divide-x lg:divide-stone-200 lg:p-3">
+            <label class="block text-xs text-stone-500 lg:px-4">Lokasi
+                <select name="city" class="mt-1 block w-full border-0 bg-transparent p-0 text-sm font-medium text-stone-950 focus:ring-0">
+                    <option value="">Semua lokasi</option>
+                    @foreach ($cities as $city)<option value="{{ $city }}">{{ $city }}</option>@endforeach
+                </select>
+            </label>
+            <label class="block text-xs text-stone-500 lg:px-4">Tipe properti
+                <select name="type" class="mt-1 block w-full border-0 bg-transparent p-0 text-sm font-medium text-stone-950 focus:ring-0">
+                    <option value="">Semua tipe</option>
+                    @foreach (['rumah' => 'Rumah', 'tanah' => 'Tanah', 'kos' => 'Bangunan kos'] as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
+                </select>
+            </label>
+            <label class="block text-xs text-stone-500 lg:px-4">Harga maksimum
+                <select name="price_max" class="mt-1 block w-full border-0 bg-transparent p-0 text-sm font-medium text-stone-950 focus:ring-0">
+                    <option value="">Semua harga</option>
+                    @foreach ([500000000 => 'Rp 500 juta', 1000000000 => 'Rp 1 miliar', 2000000000 => 'Rp 2 miliar', 5000000000 => 'Rp 5 miliar'] as $value => $label)<option value="{{ $value }}">{{ $label }}</option>@endforeach
+                </select>
+            </label>
+            <label class="block text-xs text-stone-500 lg:px-4">Kamar tidur
+                <select name="rooms_min" class="mt-1 block w-full border-0 bg-transparent p-0 text-sm font-medium text-stone-950 focus:ring-0">
+                    <option value="">Berapa saja</option>
+                    @foreach ([1, 2, 3, 4] as $rooms)<option value="{{ $rooms }}">{{ $rooms }}+</option>@endforeach
+                </select>
+            </label>
+            <div class="flex items-center justify-between gap-4 sm:col-span-2 lg:col-span-1 lg:border-0 lg:pl-4">
+                <a href="{{ route('properties.index') }}" class="text-xs text-stone-500 underline underline-offset-2 hover:text-stone-950 lg:hidden">Filter lengkap</a>
+                <button type="submit" class="rounded-full bg-stone-950 px-6 py-3 text-sm font-medium text-white hover:bg-stone-800">Cari</button>
+            </div>
+        </form>
+    </section>
+
+    {{-- Tentang dan angka ringkas --}}
+    <section class="mx-auto grid max-w-7xl gap-10 px-4 py-24 md:px-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div>
+            <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Tentang kami</p>
+            <p class="mt-4 text-2xl font-medium leading-snug tracking-tight md:text-3xl">Satu katalog untuk semua properti agensi. <span class="text-stone-400">Setiap harga dan status diambil dari data terbaru, jadi yang Anda lihat sama dengan yang ditawarkan sales.</span></p>
+        </div>
+        <dl class="grid grid-cols-3 gap-4 lg:grid-cols-1 lg:gap-6">
+            @foreach ([['listings', 'Properti tersedia'], ['cities', 'Kabupaten/kota'], ['types', 'Tipe properti']] as [$key, $label])
+                <div class="flex flex-col-reverse justify-end border-t border-stone-200 pt-4">
+                    <dt class="mt-1 text-sm text-stone-500">{{ $label }}</dt>
+                    <dd class="text-3xl font-medium tracking-tight md:text-4xl">{{ $stats[$key] }}</dd>
+                </div>
+            @endforeach
+        </dl>
+    </section>
+
+    {{-- Properti terbaru --}}
+    <section class="mx-auto max-w-7xl space-y-10 px-4 md:px-8">
+        <div class="flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Pilihan terbaru</p>
+                <h2 class="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Properti yang baru tersedia</h2>
+            </div>
+            <a href="{{ route('properties.index') }}" class="rounded-full border border-stone-300 px-5 py-2.5 text-sm font-medium hover:border-stone-950">Lihat semua →</a>
+        </div>
         @if ($listings->isEmpty())
-            <p class="rounded-xl border border-stone-200 bg-white p-8 text-stone-600">Belum ada properti tersedia. Silakan kembali lagi nanti.</p>
+            <p class="rounded-2xl border border-stone-200 p-8 text-stone-600">Belum ada properti tersedia. Silakan kembali lagi nanti.</p>
         @else
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($listings as $listing)
                     <x-listing-card :listing="$listing" />
                 @endforeach
             </div>
         @endif
+    </section>
+
+    {{-- Cara kerja --}}
+    <section id="cara-kerja" class="mx-auto max-w-7xl scroll-mt-24 px-4 pt-24 md:px-8">
+        <div class="grid gap-6 rounded-3xl bg-stone-50 p-4 md:p-6 lg:grid-cols-2">
+            <div class="flex flex-col justify-between gap-10 p-4 md:p-6">
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Cara kerja</p>
+                    <h2 class="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Dari mencari sampai bertemu sales, dalam tiga langkah</h2>
+                </div>
+                <ol class="space-y-6">
+                    @foreach ([
+                        ['Cari dan bandingkan', 'Saring berdasarkan lokasi, tipe, harga, dan luas. Setiap detail menampilkan foto, denah, dan simulasi cicilan.'],
+                        ['Pilih sales', 'Lihat daftar sales kami dan pilih siapa yang ingin Anda hubungi.'],
+                        ['Lanjut lewat WhatsApp', 'Pesan otomatis menyertakan nama dan kode properti, jadi sales langsung tahu yang Anda maksud.'],
+                    ] as [$title, $body])
+                        <li class="flex gap-4 border-t border-stone-200 pt-5">
+                            <span class="text-sm font-medium text-stone-400">0{{ $loop->iteration }}</span>
+                            <div><p class="font-medium">{{ $title }}</p><p class="mt-1 text-sm text-stone-600">{{ $body }}</p></div>
+                        </li>
+                    @endforeach
+                </ol>
+            </div>
+            {{-- aset: ilustrasi cara kerja --}}
+            <div aria-hidden="true" class="min-h-72 rounded-2xl bg-stone-200 lg:min-h-full"></div>
+        </div>
+    </section>
+
+    {{-- Tim sales --}}
+    <section id="tim-sales" class="mx-auto max-w-7xl scroll-mt-24 space-y-10 px-4 pt-24 md:px-8">
+        <div class="grid gap-4 md:grid-cols-2 md:items-end">
+            <div>
+                <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Tim sales</p>
+                <h2 class="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Pilih sales yang ingin Anda hubungi</h2>
+            </div>
+            <p class="text-sm text-stone-500 md:justify-self-end md:text-right">Semua sales dapat menawarkan seluruh properti di katalog.</p>
+        </div>
+        @if ($salesContacts->isEmpty())
+            <p class="rounded-2xl border border-stone-200 p-8 text-stone-600">Belum ada sales yang dapat dihubungi.</p>
+        @else
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach ($salesContacts as $sales)
+                    <x-sales-contact :sales="$sales" />
+                @endforeach
+            </div>
+        @endif
+    </section>
+
+    {{-- FAQ --}}
+    <section id="faq" class="mx-auto max-w-3xl scroll-mt-24 px-4 pt-24 md:px-8">
+        <div class="text-center">
+            <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">FAQ</p>
+            <h2 class="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Yang sering ditanyakan</h2>
+        </div>
+        <div class="mt-10 divide-y divide-stone-200 border-y border-stone-200">
+            @foreach ([
+                ['Bagaimana cara menghubungi sales?', 'Pilih sales di halaman ini atau di detail properti, lalu tekan tombol WhatsApp. Percakapan dan jadwal kunjungan diatur langsung bersama sales.'],
+                ['Apakah harga dan ketersediaan selalu terbaru?', 'Katalog hanya menampilkan properti yang diterbitkan dan masih tersedia. Harga dan status dibaca dari data agensi setiap kali halaman dibuka.'],
+                ['Apa itu simulasi cicilan?', 'Perkiraan pokok dan bunga per bulan dengan bunga tetap, dihitung di browser Anda. Hasilnya bukan penawaran atau persetujuan bank.'],
+                ['Apakah saya perlu membuat akun?', 'Tidak. Anda dapat menjelajahi katalog, membuka detail, dan menghubungi sales tanpa mendaftar.'],
+            ] as [$question, $answer])
+                <details class="group py-5">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
+                        {{ $question }}
+                        <span aria-hidden="true" class="text-xl leading-none text-stone-400 transition group-open:rotate-45">+</span>
+                    </summary>
+                    <p class="mt-3 text-sm leading-relaxed text-stone-600">{{ $answer }}</p>
+                </details>
+            @endforeach
+        </div>
+    </section>
+
+    {{-- Banner ajakan --}}
+    <section class="mx-auto max-w-7xl px-4 pt-24 md:px-8">
+        <div class="grid items-center gap-8 rounded-3xl bg-stone-100 p-6 md:grid-cols-2 md:p-12">
+            <div>
+                <h2 class="text-3xl font-medium tracking-tight md:text-4xl">Siap melihat pilihan berikutnya?</h2>
+                <p class="mt-4 max-w-md text-stone-600">Jelajahi seluruh katalog dengan filter lengkap, lalu hubungi sales saat Anda menemukan yang cocok.</p>
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <a href="{{ route('properties.index') }}" class="rounded-full bg-stone-950 px-6 py-3 text-sm font-medium text-white hover:bg-stone-800">Jelajahi properti</a>
+                    <a href="#tim-sales" class="rounded-full border border-stone-300 px-6 py-3 text-sm font-medium hover:border-stone-950">Hubungi sales</a>
+                </div>
+            </div>
+            {{-- aset: foto banner --}}
+            <div aria-hidden="true" class="aspect-[4/3] rounded-2xl bg-stone-200"></div>
+        </div>
     </section>
 @endsection
