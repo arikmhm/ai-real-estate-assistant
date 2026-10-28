@@ -23,7 +23,7 @@
 
         <div class="flex flex-wrap items-end justify-between gap-6">
             <div class="space-y-3">
-                <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">{{ ucfirst($listing->type) }} · {{ $listing->code }}</p>
+                <p class="text-sm text-stone-500">{{ ucfirst($listing->type) }} · {{ $listing->code }}</p>
                 <h1 class="text-3xl font-medium tracking-tight md:text-5xl">{{ $listing->title }}</h1>
                 <p class="text-stone-500">{{ $listing->district ? $listing->district.', ' : '' }}{{ $listing->city }}, {{ $listing->province }}</p>
             </div>

@@ -10,8 +10,7 @@
     <section class="mx-auto max-w-7xl space-y-10 px-4 py-12 md:px-8 md:py-16">
         <div class="grid gap-4 md:grid-cols-2 md:items-end">
             <div>
-                <p class="text-xs font-medium uppercase tracking-[0.25em] text-stone-500">Katalog</p>
-                <h1 class="mt-3 text-4xl font-medium tracking-tight md:text-5xl">Properti tersedia</h1>
+                <h1 class="text-4xl font-medium tracking-tight md:text-5xl">Properti tersedia</h1>
             </div>
             <p class="text-sm text-stone-500 md:justify-self-end md:text-right">Pilih properti untuk melihat foto dan informasi lengkap.</p>
         </div>

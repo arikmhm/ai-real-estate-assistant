@@ -19,6 +19,7 @@ class CatalogController extends Controller
 
         return view('public.home', [
             'listings' => Listing::publicCatalog()->with('media')->latest()->limit(6)->get(),
+            'landOffers' => Listing::publicCatalog()->where('type', 'tanah')->with('media')->latest()->limit(3)->get(),
             'cities' => $cities,
             'stats' => [
                 'listings' => Listing::publicCatalog()->count(),

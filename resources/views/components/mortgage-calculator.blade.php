@@ -32,7 +32,7 @@
     </form>
 
     <div data-mortgage-result aria-live="polite" hidden class="mt-6 rounded-2xl bg-stone-50 p-5">
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-stone-500">Estimasi pokok dan bunga per bulan</h3>
+        <h3 class="text-sm text-stone-500">Estimasi pokok dan bunga per bulan</h3>
         <p data-mortgage-output="monthlyPayment" class="mt-1 text-3xl font-semibold text-stone-950"></p>
         <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <div><dt class="text-stone-600">Harga simulasi</dt><dd data-mortgage-output="price" class="font-semibold"></dd></div>
