@@ -35,7 +35,7 @@
         </div>
     </header>
     <main>@yield('content')</main>
-    @if (config('assistant.enabled') && app()->environment(['local', 'testing']) && request()->routeIs('properties.index', 'properties.show'))
+    @if (config('assistant.enabled') && app()->environment(['local', 'testing']))
         <x-assistant-chat />
     @endif
     <footer class="mt-24 border-t border-stone-200">

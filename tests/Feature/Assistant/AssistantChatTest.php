@@ -27,16 +27,19 @@ class AssistantChatTest extends TestCase
         $this->postJson('/assistant/message', ['message' => 'Bandingkan', 'last_listing_ids' => [1, 1]])->assertUnprocessable();
     }
 
-    public function test_demo_panel_is_on_catalog_and_detail_only_when_enabled(): void
+    public function test_demo_widget_is_on_every_public_page_only_when_enabled(): void
     {
         $listing = Listing::factory()->create(['publication_status' => 'published']);
+        $pages = [route('home'), route('properties.index'), route('properties.show', $listing)];
         config()->set('assistant.enabled', false);
-        $this->get(route('properties.index'))->assertOk()->assertDontSee('data-assistant-chat');
-        $this->get(route('properties.show', $listing))->assertOk()->assertDontSee('data-assistant-chat');
+        foreach ($pages as $page) {
+            $this->get($page)->assertOk()->assertDontSee('data-assistant-chat');
+        }
 
         config()->set('assistant.enabled', true);
-        $this->get(route('properties.index'))->assertOk()->assertSee('data-assistant-chat');
-        $this->get(route('properties.show', $listing))->assertOk()->assertSee('data-assistant-chat');
+        foreach ($pages as $page) {
+            $this->get($page)->assertOk()->assertSee('data-assistant-chat');
+        }
     }
 
     public function test_search_uses_only_current_public_inventory_and_returns_server_built_links(): void

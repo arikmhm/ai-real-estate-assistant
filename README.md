@@ -76,7 +76,7 @@ Perintah menampilkan kata sandi acak hanya ketika sebuah akun baru dibuat. Simpa
 
 ## Asisten AI demo sintetis
 
-Asisten di katalog dan detail hanya tersedia pada lingkungan lokal. Isi `GEMINI_API_KEY` di `.env` dan set `AI_ASSISTANT_ENABLED=true`, lalu jalankan `php artisan config:clear` dan mulai ulang server. Gunakan data demo sintetis; jangan masukkan data pribadi atau data pelanggan. Model tetap `gemini-3.5-flash-lite` melalui Laravel AI SDK, tanpa billing API, penyimpanan transkrip aplikasi, atau fallback ke model lain.
+Asisten tampil sebagai widget chat di kanan bawah semua halaman publik dan hanya tersedia pada lingkungan lokal. Isi `GEMINI_API_KEY` di `.env` dan set `AI_ASSISTANT_ENABLED=true`, lalu jalankan `php artisan config:clear` dan mulai ulang server. Gunakan data demo sintetis; jangan masukkan data pribadi atau data pelanggan. Model tetap `gemini-3.5-flash-lite` melalui Laravel AI SDK, tanpa billing API, penyimpanan transkrip aplikasi, atau fallback ke model lain.
 
 Pengunjung dapat mencari listing dan meminta perbandingan maksimal tiga hasil terakhir. Riwayat singkat disimpan di `sessionStorage` tab dan dapat dihapus dengan tombol **Hapus percakapan**. Server selalu membaca ulang status dan harga. Jika Gemini gagal atau batas tercapai, gunakan filter katalog. Batas aplikasi adalah 5 pesan global/menit, 10/IP/jam, dan 100 global/hari WIB; batas RPD Google belum diketahui. Jangan mengaktifkan demo bagi pengunjung nyata pada tier gratis sebelum keputusan privasi dan kuota dibuat.
 
