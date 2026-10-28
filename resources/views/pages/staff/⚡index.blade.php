@@ -39,7 +39,7 @@ new #[Title('Staf sales')] class extends Component {
         $data = $this->validate([
             'newName' => ['required', 'string', 'max:255'],
             'newEmail' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
-            'newWhatsAppNumber' => ['required', 'regex:/^\+[1-9]\d{7,14}$/'],
+            'newWhatsAppNumber' => ['nullable', 'regex:/^\+[1-9]\d{7,14}$/'],
             'newContactEmail' => ['nullable', 'email', 'max:255'],
             'newPassword' => ['required', Password::default(), 'same:newPasswordConfirmation'],
             'newPasswordConfirmation' => ['required'],
@@ -48,11 +48,12 @@ new #[Title('Staf sales')] class extends Component {
         User::create([
             'name' => $data['newName'],
             'email' => $data['newEmail'],
-            'whatsapp_number' => $data['newWhatsAppNumber'],
+            'whatsapp_number' => $data['newWhatsAppNumber'] ?: null,
             'contact_email' => $data['newContactEmail'] ?: null,
             'password' => $data['newPassword'],
             'role' => UserRole::Sales,
             'is_active' => true,
+            'public_contact_approved' => false,
         ]);
 
         $this->reset('newName', 'newEmail', 'newWhatsAppNumber', 'newContactEmail', 'newPassword', 'newPasswordConfirmation');
@@ -80,19 +81,24 @@ new #[Title('Staf sales')] class extends Component {
         $data = $this->validate([
             'editName' => ['required', 'string', 'max:255'],
             'editEmail' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($sales->id)],
-            'editWhatsAppNumber' => ['required', 'regex:/^\+[1-9]\d{7,14}$/'],
+            'editWhatsAppNumber' => ['nullable', 'regex:/^\+[1-9]\d{7,14}$/'],
             'editContactEmail' => ['nullable', 'email', 'max:255'],
         ]);
 
         $emailChanged = $sales->email !== $data['editEmail'];
+        $contactChanged = $sales->whatsapp_number !== ($data['editWhatsAppNumber'] ?: null)
+            || $sales->contact_email !== ($data['editContactEmail'] ?: null);
         $sales->fill([
             'name' => $data['editName'],
             'email' => $data['editEmail'],
-            'whatsapp_number' => $data['editWhatsAppNumber'],
+            'whatsapp_number' => $data['editWhatsAppNumber'] ?: null,
             'contact_email' => $data['editContactEmail'] ?: null,
         ]);
         if ($emailChanged) {
             $sales->email_verified_at = null;
+        }
+        if ($contactChanged) {
+            $sales->public_contact_approved = false;
         }
         $sales->save();
 
@@ -118,6 +124,21 @@ new #[Title('Staf sales')] class extends Component {
 
         session()->flash('status', $sales->is_active ? 'Akun sales diaktifkan.' : 'Akun sales dinonaktifkan.');
     }
+
+    public function toggleContactApproval(int $salesId): void
+    {
+        $sales = User::findOrFail($salesId);
+        Gate::authorize('update', $sales);
+
+        if (! $sales->public_contact_approved && ! preg_match('/^\+[1-9]\d{7,14}$/', $sales->whatsapp_number ?? '')) {
+            $this->addError('contactApproval', 'Isi nomor WhatsApp valid sebelum menyetujui kontak publik.');
+
+            return;
+        }
+
+        $sales->update(['public_contact_approved' => ! $sales->public_contact_approved]);
+        session()->flash('status', $sales->public_contact_approved ? 'Kontak sales dipublikasikan.' : 'Publikasi kontak sales dicabut.');
+    }
 }; ?>
 
 <div class="mx-auto max-w-5xl space-y-8 p-6">
@@ -135,7 +156,7 @@ new #[Title('Staf sales')] class extends Component {
         <form wire:submit="createSales" class="mt-5 grid gap-4 md:grid-cols-2">
             <flux:input wire:model="newName" label="Nama" required />
             <flux:input wire:model="newEmail" label="Email login" type="email" required />
-            <flux:input wire:model="newWhatsAppNumber" label="WhatsApp (+628...)" required />
+            <flux:input wire:model="newWhatsAppNumber" label="WhatsApp (+628...)" />
             <flux:input wire:model="newContactEmail" label="Email kontak publik (opsional)" type="email" />
             <flux:input wire:model="newPassword" label="Kata sandi sementara" type="password" required />
             <flux:input wire:model="newPasswordConfirmation" label="Ulangi kata sandi" type="password" required />
@@ -149,7 +170,7 @@ new #[Title('Staf sales')] class extends Component {
             <form wire:submit="updateSales" class="mt-5 grid gap-4 md:grid-cols-2">
                 <flux:input wire:model="editName" label="Nama" required />
                 <flux:input wire:model="editEmail" label="Email login" type="email" required />
-                <flux:input wire:model="editWhatsAppNumber" label="WhatsApp (+628...)" required />
+                <flux:input wire:model="editWhatsAppNumber" label="WhatsApp (+628...)" />
                 <flux:input wire:model="editContactEmail" label="Email kontak publik (opsional)" type="email" />
                 <div class="flex gap-3 md:col-span-2">
                     <flux:button type="submit" variant="primary">Simpan</flux:button>
@@ -161,15 +182,20 @@ new #[Title('Staf sales')] class extends Component {
 
     <section class="space-y-3">
         <flux:heading size="lg">Daftar sales</flux:heading>
+        @error('contactApproval')<p role="alert" class="text-sm text-red-700">{{ $message }}</p>@enderror
         @forelse (User::where('role', UserRole::Sales->value)->orderBy('name')->get() as $sales)
             <div wire:key="sales-{{ $sales->id }}" class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
                 <div>
                     <div class="font-semibold">{{ $sales->name }} <span class="text-sm font-normal text-zinc-500">{{ $sales->is_active ? 'Aktif' : 'Nonaktif' }}</span></div>
                     <div class="text-sm text-zinc-600 dark:text-zinc-300">{{ $sales->email }} · {{ $sales->whatsapp_number ?: 'WhatsApp belum diisi' }}</div>
                     @if ($sales->contact_email)<div class="text-sm text-zinc-500">{{ $sales->contact_email }}</div>@endif
+                    <div class="text-sm text-zinc-500">Kontak publik: {{ $sales->public_contact_approved ? 'Disetujui' : 'Belum disetujui' }}</div>
                 </div>
                 <div class="flex gap-2">
                     <flux:button wire:click="startEdit({{ $sales->id }})">Ubah</flux:button>
+                    <flux:button wire:click="toggleContactApproval({{ $sales->id }})" :disabled="! $sales->public_contact_approved && ! $sales->whatsapp_number">
+                        {{ $sales->public_contact_approved ? 'Cabut kontak publik' : 'Setujui kontak publik' }}
+                    </flux:button>
                     <flux:button wire:click="toggleActive({{ $sales->id }})" :variant="$sales->is_active ? 'danger' : 'primary'">
                         {{ $sales->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                     </flux:button>

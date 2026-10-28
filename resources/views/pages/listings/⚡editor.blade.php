@@ -3,6 +3,7 @@
 use App\Models\Listing;
 use App\Models\ListingMedia;
 use App\Services\ListingMediaService;
+use App\Services\ListingStatusService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -102,22 +103,11 @@ new #[Title('Editor properti')] class extends Component {
         session()->flash('status', 'Properti disimpan.');
     }
 
-    public function publish(): void
+    public function publish(ListingStatusService $statusService): void
     {
         $listing = $this->currentListing();
         Gate::authorize('update', $listing);
-        $result = DB::transaction(function () use ($listing): string {
-            $locked = Listing::query()->lockForUpdate()->findOrFail($listing->id);
-            if ($locked->publication_status === 'archived') {
-                return 'archived';
-            }
-            if (! $locked->canPublish()) {
-                return 'incomplete';
-            }
-            $locked->update(['publication_status' => 'published']);
-
-            return 'published';
-        });
+        $result = $statusService->publish(auth()->user(), $listing);
         if ($result === 'archived') {
             $this->addError('publication', 'Kembalikan arsip ke draf sebelum menerbitkan.');
 
@@ -129,29 +119,27 @@ new #[Title('Editor properti')] class extends Component {
         }
     }
 
-    public function archive(): void
+    public function archive(ListingStatusService $statusService): void
     {
         $listing = $this->currentListing();
         Gate::authorize('update', $listing);
-        $listing->update(['publication_status' => 'archived']);
+        $statusService->archive(auth()->user(), $listing);
     }
 
-    public function restoreDraft(): void
+    public function restoreDraft(ListingStatusService $statusService): void
     {
         $listing = $this->currentListing();
         Gate::authorize('update', $listing);
-        $listing->update(['publication_status' => 'draft']);
+        $statusService->restoreDraft(auth()->user(), $listing);
     }
 
-    public function setAvailability(string $status): void
+    public function setAvailability(ListingStatusService $statusService, string $status): void
     {
         $listing = $this->currentListing();
         Gate::authorize('update', $listing);
-        if (! in_array($status, ['available', 'reserved', 'sold'], true)) {
+        if (! $statusService->setAvailability(auth()->user(), $listing, $status)) {
             $this->addError('availability', 'Status ketersediaan tidak valid.');
-            return;
         }
-        $listing->update(['availability_status' => $status]);
     }
 
     public function savePhotos(): void
@@ -281,6 +269,19 @@ new #[Title('Editor properti')] class extends Component {
                 <flux:button wire:click="setAvailability('reserved')">Dipesan</flux:button>
                 <flux:button wire:click="setAvailability('sold')">Terjual</flux:button>
             </div>
+        </section>
+        <section class="space-y-3 rounded-xl border border-zinc-200 p-6 dark:border-zinc-700">
+            <flux:heading size="lg">Riwayat status</flux:heading>
+            <flux:text>Perubahan sejak pencatatan riwayat diaktifkan.</flux:text>
+            @php($statusLabels = ['draft' => 'Draf', 'published' => 'Terbit', 'archived' => 'Arsip', 'available' => 'Tersedia', 'reserved' => 'Dipesan', 'sold' => 'Terjual'])
+            @forelse ($current->statusChanges()->with('actor')->get() as $change)
+                <div class="rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-700">
+                    <p class="font-medium">{{ $change->field === 'availability_status' ? 'Ketersediaan' : 'Publikasi' }}: {{ $statusLabels[$change->from_value] }} → {{ $statusLabels[$change->to_value] }}</p>
+                    <p class="text-zinc-500">{{ $change->actor->name }} · {{ $change->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB</p>
+                </div>
+            @empty
+                <flux:text>Belum ada perubahan status yang tercatat.</flux:text>
+            @endforelse
         </section>
     @endif
 </div>

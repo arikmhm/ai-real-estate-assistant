@@ -18,6 +18,12 @@
                     <flux:sidebar.item icon="building-office" :href="route('listings.index')" :current="request()->routeIs('listings.*')" wire:navigate>
                         Inventaris
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="users" :href="route('prospects.index')" :current="request()->routeIs('prospects.*')" wire:navigate>
+                        Prospek
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="calendar-days" :href="route('visits.index')" :current="request()->routeIs('visits.*')" wire:navigate>
+                        Kunjungan
+                    </flux:sidebar.item>
                     @can('viewAny', \App\Models\User::class)
                         <flux:sidebar.item icon="users" :href="route('staff.index')" :current="request()->routeIs('staff.index')" wire:navigate>
                             Staf sales

@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Ai\NoRetryGeminiGateway;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Ai\Ai;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        Ai::textProvider('gemini')->useTextGateway(new NoRetryGeminiGateway($this->app->make(Dispatcher::class)));
     }
 
     /**

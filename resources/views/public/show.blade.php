@@ -76,7 +76,25 @@
                     @endif
                 </dl>
                 <p class="text-xs leading-relaxed text-stone-500">Informasi dan ketersediaan dapat berubah.</p>
+                <section class="space-y-3 border-t border-stone-200 pt-5">
+                    <h2 class="text-xl font-semibold">Hubungi sales</h2>
+                    @forelse ($salesContacts as $sales)
+                        <div class="rounded-lg border border-stone-200 p-3">
+                            <p class="font-medium">{{ $sales->name }}</p>
+                            @if ($sales->public_contact_approved && preg_match('/^\+[1-9]\d{7,14}$/', $sales->whatsapp_number ?? ''))
+                                @php($message = 'Halo, saya ingin bertanya tentang '.$listing->title.' ('.$listing->code.'): '.route('properties.show', $listing))
+                                <a href="https://wa.me/{{ substr($sales->whatsapp_number, 1) }}?text={{ rawurlencode($message) }}" target="_blank" rel="noopener noreferrer" class="mt-2 inline-block rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-800">WhatsApp {{ $sales->name }}</a>
+                                @if ($sales->contact_email)<a href="mailto:{{ $sales->contact_email }}" class="mt-2 block text-sm text-emerald-700 underline">Email {{ $sales->name }}</a>@endif
+                            @else
+                                <p class="mt-1 text-sm text-stone-500">Kontak belum tersedia.</p>
+                            @endif
+                        </div>
+                    @empty
+                        <p class="text-sm text-stone-600">Belum ada sales yang dapat dihubungi.</p>
+                    @endforelse
+                </section>
             </aside>
         </div>
+        <x-mortgage-calculator :listing="$listing" />
     </div>
 @endsection

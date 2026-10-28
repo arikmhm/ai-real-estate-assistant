@@ -54,6 +54,12 @@ class Listing extends Model
         return $this->hasMany(ListingMedia::class)->orderBy('position')->orderBy('id');
     }
 
+    /** @return HasMany<ListingStatusChange, $this> */
+    public function statusChanges(): HasMany
+    {
+        return $this->hasMany(ListingStatusChange::class)->orderByDesc('created_at')->orderByDesc('id');
+    }
+
     /**
      * @param  Builder<Listing>  $query
      * @return Builder<Listing>

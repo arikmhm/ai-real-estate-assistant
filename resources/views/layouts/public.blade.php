@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="@yield('description', 'Jelajahi properti yang tersedia dari satu katalog agensi.')">
     <meta property="og:title" content="@yield('title', 'Katalog Properti')">
     <meta property="og:description" content="@yield('description', 'Jelajahi properti yang tersedia dari satu katalog agensi.')">
@@ -28,6 +29,9 @@
         </div>
     </header>
     <main>@yield('content')</main>
+    @if (config('assistant.enabled') && app()->environment(['local', 'testing']) && request()->routeIs('properties.index', 'properties.show'))
+        <x-assistant-chat />
+    @endif
     <footer class="mt-16 border-t border-stone-200 bg-white px-5 py-8 text-center text-sm text-stone-500">Katalog properti · Informasi diperbarui oleh agensi.</footer>
 </body>
 </html>

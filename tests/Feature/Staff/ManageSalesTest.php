@@ -88,6 +88,47 @@ class ManageSalesTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'sales@example.test', 'role' => 'sales']);
     }
 
+    public function test_admin_can_create_profile_without_public_contact_and_approve_only_after_number_is_valid(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        Livewire::test('pages::staff.index')
+            ->set('newName', 'Sales Tanpa Kontak')
+            ->set('newEmail', 'tanpa@example.test')
+            ->set('newPassword', 'secret-long-password')
+            ->set('newPasswordConfirmation', 'secret-long-password')
+            ->call('createSales')->assertHasNoErrors();
+        $sales = User::where('email', 'tanpa@example.test')->firstOrFail();
+
+        Livewire::test('pages::staff.index')->call('toggleContactApproval', $sales->id)->assertHasErrors();
+        $this->assertFalse($sales->fresh()->public_contact_approved);
+
+        Livewire::test('pages::staff.index')->call('startEdit', $sales->id)
+            ->set('editWhatsAppNumber', '+6281234567890')->call('updateSales')->assertHasNoErrors();
+        Livewire::test('pages::staff.index')->call('toggleContactApproval', $sales->id)->assertHasNoErrors();
+        $this->assertTrue($sales->fresh()->public_contact_approved);
+        Livewire::test('pages::staff.index')->call('toggleContactApproval', $sales->id)->assertHasNoErrors();
+        $this->assertFalse($sales->fresh()->public_contact_approved);
+    }
+
+    public function test_editing_approved_contact_revokes_approval(): void
+    {
+        $sales = User::factory()->create(['whatsapp_number' => '+6281234567890', 'contact_email' => 'lama@example.test', 'public_contact_approved' => true]);
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+
+        Livewire::test('pages::staff.index')->call('startEdit', $sales->id)
+            ->set('editContactEmail', 'baru@example.test')->call('updateSales')->assertHasNoErrors();
+
+        $this->assertFalse($sales->fresh()->public_contact_approved);
+    }
+
+    public function test_contact_change_on_user_model_revokes_approval(): void
+    {
+        $sales = User::factory()->create(['whatsapp_number' => '+6281234567890', 'public_contact_approved' => true]);
+        $sales->update(['whatsapp_number' => '+6281234567891']);
+
+        $this->assertFalse($sales->fresh()->public_contact_approved);
+    }
+
     public function test_admin_edits_only_sales_profile_and_contact(): void
     {
         $sales = User::factory()->create(['whatsapp_number' => '+6281234567890']);

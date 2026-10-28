@@ -73,6 +73,29 @@ class PublicCatalogTest extends TestCase
             ->assertSee('<meta name="description"', false);
     }
 
+    public function test_installment_calculator_uses_current_price_on_all_published_details(): void
+    {
+        foreach (['available', 'reserved', 'sold'] as $status) {
+            $listing = Listing::factory()->create([
+                'publication_status' => 'published', 'availability_status' => $status, 'price_idr' => 900000000,
+            ]);
+
+            $this->get(route('properties.show', $listing))->assertOk()
+                ->assertSee('data-mortgage-calculator', false)
+                ->assertSee('data-mortgage-price value="900000000"', false)
+                ->assertSee('bukan penawaran atau persetujuan bank');
+
+            $listing->update(['price_idr' => 950000000]);
+            $this->get(route('properties.show', $listing))->assertOk()
+                ->assertSee('data-mortgage-price value="950000000"', false);
+        }
+
+        $draft = Listing::factory()->create(['publication_status' => 'draft']);
+        $archived = Listing::factory()->create(['publication_status' => 'archived']);
+        $this->get(route('properties.show', $draft))->assertNotFound();
+        $this->get(route('properties.show', $archived))->assertNotFound();
+    }
+
     public function test_catalog_shows_clear_empty_state_and_paginates(): void
     {
         $this->get('/properti')->assertOk()->assertSee('Belum ada properti tersedia');
