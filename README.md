@@ -28,6 +28,8 @@ Aditamaland Property menjawabnya dengan satu sumber data:
 | ![Katalog](docs/screenshots/02-katalog.png) | ![Simulasi cicilan](docs/screenshots/03-detail-cicilan.png) |
 | **Asisten AI: pencarian** | **Asisten AI: perbandingan** |
 | ![Asisten AI mencari](docs/screenshots/04-chat-ai.png) | ![Asisten AI membandingkan](docs/screenshots/04b-chat-banding.png) |
+| **Asisten AI: kontak sales** | **Asisten AI: di luar topik** |
+| ![Asisten AI kontak sales](docs/screenshots/04c-chat-sales.png) | ![Asisten AI menolak topik](docs/screenshots/04d-chat-tolak.png) |
 | **Properti terjual** | **Dashboard admin** |
 | ![Properti terjual](docs/screenshots/05-terjual.png) | ![Dashboard admin](docs/screenshots/10-dashboard-admin.png) |
 | **Dashboard sales** | **Inventaris** |

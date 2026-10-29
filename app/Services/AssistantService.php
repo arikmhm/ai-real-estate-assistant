@@ -31,7 +31,7 @@ class AssistantService
             'pesan' => $message,
             'riwayat_pesan_pengguna' => array_map(AssistantGuard::redact(...), $history),
             'jumlah_hasil_sebelumnya' => count($lastIds),
-        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR), provider: 'gemini', model: config('assistant.model'), timeout: 15);
+        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR), provider: 'gemini', model: config('assistant.model'), timeout: 60);
         $scope = $response['scope'] ?? 'properti';
 
         if ($scope === 'di_luar_topik') {
