@@ -30,10 +30,14 @@ class SeedKudusSalesTest extends TestCase
             $this->assertSame($email, $sales->contact_email);
             $this->assertTrue($sales->public_contact_approved);
             $this->assertNotNull($sales->whatsappUrl());
+            $this->assertFileExists(public_path($sales->avatar_path));
         }
+        $this->assertSame('images/sales/avatar-04.webp', User::where('email', $emails[0])->value('avatar_path'));
 
+        User::where('email', $emails[1])->update(['avatar_path' => null]);
         $this->artisan('demo:seed-kudus-sales')->assertSuccessful();
         $this->assertDatabaseCount('users', 3);
+        $this->assertSame('images/sales/avatar-01.webp', User::where('email', $emails[1])->value('avatar_path'));
         $this->assertSame($passwords, User::orderBy('email')->pluck('password')->all());
     }
 

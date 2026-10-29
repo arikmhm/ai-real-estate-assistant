@@ -6,16 +6,18 @@
 @section('content')
     {{-- Hero --}}
     <section class="px-4 pt-4 md:px-8">
-        {{-- aset: foto hero. Saat foto dipasang, tambahkan overlay gelap dan ubah teks menjadi putih. --}}
         <div
-            class="relative mx-auto flex min-h-[26rem] max-w-7xl flex-col items-center justify-center rounded-3xl bg-stone-200 px-6 pb-24 pt-16 text-center md:min-h-[36rem]">
-            <span aria-hidden="true" class="mb-6 h-1.5 w-14 rounded-full bg-brand-accent"></span>
-            <h1 class="max-w-3xl text-4xl font-medium leading-[1.05] tracking-tight md:text-6xl">Harga minimalis, kualitas
+            class="relative mx-auto flex min-h-[26rem] max-w-7xl flex-col items-center justify-center overflow-hidden rounded-3xl bg-stone-900 px-6 pb-24 pt-16 text-center md:min-h-[36rem]">
+            <img src="{{ asset('images/home/hero.webp') }}" alt="" class="absolute inset-0 size-full object-cover"
+                fetchpriority="high">
+            <div aria-hidden="true" class="absolute inset-0 bg-stone-950/45"></div>
+            <span aria-hidden="true" class="relative mb-6 h-1.5 w-14 rounded-full bg-brand-accent"></span>
+            <h1 class="relative max-w-3xl text-4xl font-medium leading-[1.05] tracking-tight text-white md:text-6xl">Harga minimalis, kualitas
                 maksimalis</h1>
-            <p class="mt-5 max-w-xl text-stone-600">Temukan properti yang sesuai dengan rencana Anda. Harga dan
+            <p class="relative mt-5 max-w-xl text-white/80">Temukan properti yang sesuai dengan rencana Anda. Harga dan
                 ketersediaan langsung dari data kami; pilih sales favorit dan lanjutkan lewat WhatsApp.</p>
             <a href="{{ route('properties.index') }}"
-                class="mt-8 rounded-full bg-brand px-6 py-3 text-sm font-medium text-white hover:bg-brand-strong">Lihat
+                class="relative mt-8 rounded-full bg-brand px-6 py-3 text-sm font-medium text-white hover:bg-brand-strong">Lihat
                 properti</a>
         </div>
     </section>
@@ -196,8 +198,10 @@
                     @endforeach
                 </ol>
             </div>
-            {{-- aset: ilustrasi cara kerja --}}
-            <div aria-hidden="true" class="min-h-72 rounded-2xl bg-stone-200 lg:min-h-full"></div>
+            <div class="relative min-h-72 overflow-hidden rounded-2xl bg-stone-200 lg:min-h-full">
+                <img src="{{ asset('images/home/cara-kerja.webp') }}" alt="" loading="lazy"
+                    class="absolute inset-0 size-full object-cover">
+            </div>
         </div>
     </section>
 
@@ -255,8 +259,8 @@
                         sales</a>
                 </div>
             </div>
-            {{-- aset: foto banner --}}
-            <div aria-hidden="true" class="aspect-[4/3] rounded-2xl bg-stone-200"></div>
+            <img src="{{ asset('images/home/banner-ajakan.webp') }}" alt="" loading="lazy"
+                class="aspect-[4/3] w-full rounded-2xl bg-stone-200 object-cover">
         </div>
     </section>
 @endsection

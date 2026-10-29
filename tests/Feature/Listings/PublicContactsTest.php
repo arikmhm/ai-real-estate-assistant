@@ -37,10 +37,13 @@ class PublicContactsTest extends TestCase
         Listing::factory()->create(['publication_status' => 'published', 'city' => 'Kudus', 'type' => 'rumah']);
         Listing::factory()->create(['publication_status' => 'published', 'city' => 'Jepara', 'type' => 'tanah', 'title' => 'Lahan Kosong Jepara', 'price_idr' => 300000000, 'land_area_m2' => 150]);
         Listing::factory()->create(['publication_status' => 'published', 'availability_status' => 'sold', 'city' => 'Pati']);
-        User::factory()->create(['name' => 'Alya Puspitasari', 'whatsapp_number' => '+6281234567890', 'public_contact_approved' => true]);
+        User::factory()->create(['name' => 'Alya Puspitasari', 'whatsapp_number' => '+6281234567890', 'public_contact_approved' => true, 'avatar_path' => 'images/sales/avatar-04.webp']);
         User::factory()->create(['name' => 'Sales Nonaktif', 'is_active' => false, 'whatsapp_number' => '+628111111111', 'public_contact_approved' => true]);
 
         $this->get('/')->assertOk()
+            ->assertSee(asset('images/sales/avatar-04.webp'), false)
+            ->assertSee(asset('images/home/hero.webp'), false)
+            ->assertSee('content="'.asset('images/og-default.jpg').'"', false)
             ->assertSee('Alya Puspitasari')->assertDontSee('Sales Nonaktif')
             ->assertSee('wa.me/6281234567890?text='.rawurlencode('Halo, saya ingin bertanya tentang properti di '.config('app.name').'.'), false)
             ->assertSeeInOrder(['Properti tersedia', '>2</dd>', 'Kabupaten/kota', '>2</dd>'], false)

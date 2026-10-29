@@ -25,9 +25,9 @@ class SeedKudusSales extends Command
 
         // Synthetic contacts: the +62800 prefix is not an Indonesian mobile range, so wa.me links reach no real person.
         $profiles = [
-            ['name' => 'Alya Puspitasari', 'email' => 'alya.puspitasari@example.test', 'whatsapp_number' => '+628000000001'],
-            ['name' => 'Bagas Pradana', 'email' => 'bagas.pradana@example.test', 'whatsapp_number' => '+628000000002'],
-            ['name' => 'Rizky Mahendra', 'email' => 'rizky.mahendra@example.test', 'whatsapp_number' => '+628000000003'],
+            ['name' => 'Alya Puspitasari', 'email' => 'alya.puspitasari@example.test', 'whatsapp_number' => '+628000000001', 'avatar_path' => 'images/sales/avatar-04.webp'],
+            ['name' => 'Bagas Pradana', 'email' => 'bagas.pradana@example.test', 'whatsapp_number' => '+628000000002', 'avatar_path' => 'images/sales/avatar-01.webp'],
+            ['name' => 'Rizky Mahendra', 'email' => 'rizky.mahendra@example.test', 'whatsapp_number' => '+628000000003', 'avatar_path' => 'images/sales/avatar-05.webp'],
         ];
 
         // Check every address before creating anything, so a collision cannot leave a partial set.
@@ -43,7 +43,11 @@ class SeedKudusSales extends Command
         }
 
         foreach ($profiles as $profile) {
-            if ($existing->has($profile['email'])) {
+            if ($user = $existing->get($profile['email'])) {
+                // Accounts seeded before avatars existed get one; a later change stays untouched.
+                if ($user->avatar_path === null) {
+                    $user->update(['avatar_path' => $profile['avatar_path']]);
+                }
                 $this->line("Lewati {$profile['name']}: akun sudah ada.");
 
                 continue;
@@ -58,6 +62,7 @@ class SeedKudusSales extends Command
                 'whatsapp_number' => $profile['whatsapp_number'],
                 'contact_email' => $profile['email'],
                 'public_contact_approved' => true,
+                'avatar_path' => $profile['avatar_path'],
             ]);
 
             $created++;

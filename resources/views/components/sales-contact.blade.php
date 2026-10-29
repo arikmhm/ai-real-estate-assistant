@@ -1,8 +1,11 @@
 @props(['sales', 'listing' => null])
 
 <div {{ $attributes->class('flex items-center gap-3 rounded-2xl border border-stone-200 bg-white p-3') }}>
-    {{-- aset: foto sales --}}
-    <div aria-hidden="true" class="size-12 shrink-0 rounded-full bg-stone-200"></div>
+    @if ($sales->avatar_path)
+        <img src="{{ asset($sales->avatar_path) }}" alt="" loading="lazy" class="size-12 shrink-0 rounded-full bg-stone-200 object-cover">
+    @else
+        <div aria-hidden="true" class="size-12 shrink-0 rounded-full bg-stone-200"></div>
+    @endif
     <div class="min-w-0 flex-1">
         <p class="truncate font-medium">{{ $sales->name }}</p>
         @if ($whatsappUrl = $sales->whatsappUrl($listing))

@@ -10,9 +10,7 @@
     @hasSection('robots')
         <meta name="robots" content="@yield('robots')">
     @endif
-    @hasSection('image')
-        <meta property="og:image" content="@yield('image')">
-    @endif
+    <meta property="og:image" content="@yield('image', asset('images/og-default.jpg'))">
     <title>@yield('title', 'Katalog Properti') · {{ config('app.name') }}</title>
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
