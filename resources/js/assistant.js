@@ -49,7 +49,7 @@ if (root) {
         bubble('assistant', data.answer);
         if (data.mode === 'compare' && data.listings?.length) {
             const wrapper = document.createElement('div');
-            wrapper.className = 'max-w-full self-start overflow-x-auto rounded-2xl border border-stone-200';
+            wrapper.className = 'max-w-full shrink-0 self-start overflow-x-auto rounded-2xl border border-stone-200';
             const table = document.createElement('table');
             table.className = 'w-full min-w-[32rem] border-collapse text-left text-xs';
             const head = document.createElement('thead');
