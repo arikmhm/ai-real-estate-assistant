@@ -119,7 +119,7 @@
                     </div>
                 </div>
                 <p class="text-xs leading-relaxed text-stone-500">Informasi dan ketersediaan dapat berubah.</p>
-                <section class="space-y-3 border-t border-stone-200 pt-6">
+                <section id="kontak" class="scroll-mt-24 space-y-3 border-t border-stone-200 pt-6">
                     @if ($listing->isSold())
                         <h2 class="font-medium">Properti ini sudah terjual</h2>
                         <p class="text-sm text-stone-600">Lihat properti lain yang masih tersedia.</p>

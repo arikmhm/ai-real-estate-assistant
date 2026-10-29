@@ -70,7 +70,7 @@ php artisan demo:import-kudus --apply
 
 `--check` memeriksa manifest, 32 WebP, database, dan koneksi R2 tanpa unggah. `--apply` aman diulang: melanjutkan listing parsial tanpa menggandakan yang lengkap, dan berhenti pada listing yang punya media manual tambahan. Setelah aset sumber berubah, `--apply --replace` mengganti media kedelapan listing.
 
-Tiga akun sales sintetis (email `@example.test`, tanpa kontak publik) dibuat dengan perintah berikut. Kata sandinya tetap untuk development dan tertulis di `app/Console/Commands/SeedKudusSales.php`; perintah menolak berjalan di luar `APP_ENV=local` dan melewati akun yang sudah ada.
+Tiga akun sales sintetis (email `@example.test`, WhatsApp sintetis `+62800…` yang disetujui tampil publik) dibuat dengan perintah berikut. Kata sandinya tetap untuk development dan tertulis di `app/Console/Commands/SeedKudusSales.php`; perintah menolak berjalan di luar `APP_ENV=local` dan melewati akun yang sudah ada.
 
 ```bash
 php artisan demo:seed-kudus-sales

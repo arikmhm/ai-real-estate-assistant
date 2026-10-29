@@ -80,6 +80,19 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             : $initials;
     }
 
+    /** Public WhatsApp link, or null when the contact is not approved or the number is invalid. */
+    public function whatsappUrl(?Listing $listing = null): ?string
+    {
+        if (! $this->public_contact_approved || ! preg_match('/^\+[1-9]\d{7,14}$/', $this->whatsapp_number ?? '')) {
+            return null;
+        }
+        $message = $listing
+            ? 'Halo, saya ingin bertanya tentang '.$listing->title.' ('.$listing->code.'): '.route('properties.show', $listing)
+            : 'Halo, saya ingin bertanya tentang properti di '.config('app.name').'.';
+
+        return 'https://wa.me/'.substr($this->whatsapp_number, 1).'?text='.rawurlencode($message);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;

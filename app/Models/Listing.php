@@ -54,6 +54,20 @@ class Listing extends Model
         return AvailabilityStatus::from($this->availability_status)->label();
     }
 
+    /** @return array<string, mixed> */
+    public function assistantFacts(): array
+    {
+        return [
+            'id' => $this->id, 'code' => $this->code, 'title' => $this->title, 'type' => $this->type,
+            'price_idr' => $this->price_idr,
+            'price_formatted' => 'Rp'.number_format($this->price_idr, 0, ',', '.'),
+            'city' => $this->city, 'district' => $this->district,
+            'land_area_m2' => $this->land_area_m2, 'building_area_m2' => $this->building_area_m2,
+            'rooms' => $this->rooms,
+            'facilities' => array_slice((array) $this->facilities, 0, 5),
+        ];
+    }
+
     public function isSold(): bool
     {
         return $this->availability_status === AvailabilityStatus::Sold->value;

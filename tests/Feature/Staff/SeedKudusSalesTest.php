@@ -16,7 +16,7 @@ class SeedKudusSalesTest extends TestCase
         app()->detectEnvironment(fn () => 'local');
     }
 
-    public function test_local_command_creates_three_unapproved_sales_and_is_idempotent(): void
+    public function test_local_command_creates_three_sales_with_approved_synthetic_contacts_and_is_idempotent(): void
     {
         $this->artisan('demo:seed-kudus-sales')->assertSuccessful();
         $emails = ['alya.puspitasari@example.test', 'bagas.pradana@example.test', 'rizky.mahendra@example.test'];
@@ -26,9 +26,10 @@ class SeedKudusSalesTest extends TestCase
             $sales = User::where('email', $email)->firstOrFail();
             $this->assertSame('sales', $sales->role->value);
             $this->assertTrue($sales->is_active);
-            $this->assertNull($sales->whatsapp_number);
-            $this->assertNull($sales->contact_email);
-            $this->assertFalse($sales->public_contact_approved);
+            $this->assertMatchesRegularExpression('/^\+62800\d{7}$/', $sales->whatsapp_number);
+            $this->assertSame($email, $sales->contact_email);
+            $this->assertTrue($sales->public_contact_approved);
+            $this->assertNotNull($sales->whatsappUrl());
         }
 
         $this->artisan('demo:seed-kudus-sales')->assertSuccessful();

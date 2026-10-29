@@ -2,13 +2,14 @@
 
 namespace App\Services;
 
-use App\Ai\Agents\ListingExplanationAgent;
-use App\Ai\Agents\SearchIntentAgent;
+use App\Ai\Agents\PropertyAssistantAgent;
+use App\Ai\Tools\CompareListings;
+use App\Ai\Tools\SalesContacts;
+use App\Ai\Tools\SearchListings;
 use App\Models\Listing;
+use App\Models\User;
 use App\Queries\ListingSearch;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use RuntimeException;
+use App\Support\AssistantGuard;
 
 class AssistantService
 {
@@ -21,126 +22,81 @@ class AssistantService
      */
     public function reply(string $message, array $history, array $lastIds): array
     {
-        $locations = Listing::publicCatalog()->select('city', 'district')->distinct()->limit(60)->get()->toArray();
-        $intent = SearchIntentAgent::make()->prompt(json_encode([
-            'pesan' => $message, 'riwayat_pesan_pengguna' => $history,
-            'lokasi_tersedia' => $locations,
+        $message = AssistantGuard::redact($message);
+        $search = new SearchListings($this->search);
+        $compare = new CompareListings($lastIds);
+        $contacts = new SalesContacts($search, $compare, $lastIds);
+
+        $response = (new PropertyAssistantAgent([$search, $compare, $contacts]))->prompt(json_encode([
+            'pesan' => $message,
+            'riwayat_pesan_pengguna' => array_map(AssistantGuard::redact(...), $history),
             'jumlah_hasil_sebelumnya' => count($lastIds),
-        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR), provider: 'gemini', model: config('assistant.model'), timeout: 15)->toArray();
+        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR), provider: 'gemini', model: config('assistant.model'), timeout: 15);
+        $scope = $response['scope'] ?? 'properti';
 
-        $rules = ['intent' => ['required', 'in:search,compare'], 'compare_positions' => ['present', 'array', 'max:3'], 'compare_positions.*' => ['integer', 'between:1,3', 'distinct']];
-        foreach (['q', 'city', 'district', 'type'] as $field) {
-            $rules[$field] = ['nullable', 'string', 'max:100'];
-        }
-        foreach (['price_min', 'price_max', 'land_min', 'land_max', 'building_min', 'building_max', 'rooms_min'] as $field) {
-            $rules[$field] = ['nullable', 'integer', 'min:0'];
-        }
-        if (Validator::make($intent, $rules)->fails()) {
-            throw new RuntimeException('Invalid intent response');
+        if ($scope === 'di_luar_topik') {
+            return $this->payload('Maaf, saya hanya dapat membantu pencarian dan informasi properti di Aditamaland.');
         }
 
-        $isComparison = $intent['intent'] === 'compare';
-        if ($isComparison) {
-            $positions = $intent['compare_positions'] ?: range(1, count($lastIds));
-            $ids = array_values(array_filter(array_map(fn (int $position) => $lastIds[$position - 1] ?? null, $positions)));
-            $current = Listing::publicCatalog()->whereIn('id', $ids)->get()->keyBy('id');
-            $listings = collect($ids)->map(fn (int $id) => $current->get($id))->filter()->values();
-        } else {
-            $filters = array_intersect_key($intent, array_flip(['q', 'city', 'district', 'type', 'price_min', 'price_max', 'land_min', 'land_max', 'building_min', 'building_max', 'rooms_min']));
-            if (! in_array($filters['type'] ?? null, ['rumah', 'tanah', 'kos'], true)) {
-                unset($filters['type']);
-            }
-            $listings = $this->search->query($filters)->orderByDesc('updated_at')->limit(3)->get();
-        }
-
-        if ($isComparison && $listings->isEmpty()) {
-            return ['answer' => 'Pilihan sebelumnya tidak lagi tersedia. Cari ulang di katalog.', 'listings' => [], 'catalog_url' => route('properties.index')];
-        }
-
-        $facts = $listings->map(fn (Listing $listing) => $this->facts($listing))->all();
-        $promptFacts = array_map(fn (array $row) => [
-            'id' => $row['id'], 'title' => Str::limit($row['title'], 100), 'type' => $row['type'],
-            'price_idr' => $row['price_idr'], 'city' => Str::limit($row['city'] ?? '', 80),
-            'district' => Str::limit($row['district'] ?? '', 80), 'land_area_m2' => $row['land_area_m2'],
-            'building_area_m2' => $row['building_area_m2'], 'rooms' => $row['rooms'],
-            'facilities' => array_map(fn ($facility) => Str::limit((string) $facility, 60), $row['facilities']),
-        ], $facts);
-        $explanation = ListingExplanationAgent::make()->prompt(json_encode([
-            'pesan' => $message, 'mode' => $isComparison ? 'compare' : 'search', 'hasil' => $promptFacts,
-        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR), provider: 'gemini', model: config('assistant.model'), timeout: 15)->toArray();
-
+        $isComparison = ! $search->listingIds && $compare->listingIds !== null;
         // A listing may change while Gemini is responding. Use the latest public rows for output.
-        $resultIds = $listings->pluck('id')->all();
-        if ($resultIds) {
-            $latest = Listing::publicCatalog()->whereIn('id', $resultIds)->get()->keyBy('id');
-            $listings = collect($resultIds)->map(fn (int $id) => $latest->get($id))->filter()->values();
-            $facts = $listings->map(fn (Listing $listing) => $this->facts($listing))->all();
+        $ids = $search->listingIds ?: $compare->listingIds ?: [];
+        $latest = Listing::publicCatalog()->whereIn('id', $ids)->get()->keyBy('id');
+        $facts = collect($ids)->map(fn (int $id) => $latest->get($id))->filter()
+            ->map(fn (Listing $listing) => $listing->assistantFacts() + ['url' => route('properties.show', $listing)])->values()->all();
+
+        // A contact request already answered by SalesContacts is never "data not recorded".
+        if ($scope === 'data_tidak_tersedia' && $contacts->sales === null) {
+            $answer = $contacts->lookup()->isEmpty()
+                ? 'Informasi itu belum tercatat di data kami, dan kontak sales belum tersedia saat ini.'
+                : 'Informasi itu belum tercatat di data kami. Tanyakan langsung kepada sales.';
+        } elseif ($contacts->sales?->isEmpty() && ! $facts) {
+            $answer = $contacts->listingUnavailable
+                ? 'Properti itu tidak lagi tersedia, jadi kontak sales tidak ditampilkan. Cari properti lain di katalog.'
+                : 'Maaf, kontak sales belum tersedia saat ini. Silakan cek kembali nanti atau gunakan filter katalog.';
+        } else {
+            $answer = (string) ($response['answer'] ?? '');
+            if (! AssistantGuard::isGrounded($answer, $facts, $message)) {
+                $answer = $this->fallback($search, $compare, $contacts, $lastIds, count($facts));
+            }
         }
 
-        $keys = array_values(array_intersect((array) ($explanation['reason_keys'] ?? []), ['location', 'price', 'type', 'land', 'building', 'rooms', 'facilities']));
-        $answer = $listings->isEmpty()
-            ? ($isComparison ? 'Pilihan sebelumnya tidak lagi tersedia. Cari ulang di katalog.' : 'Tidak ada properti yang cocok saat ini. Coba longgarkan kriteria di katalog.')
-            : ($isComparison
-                ? (count($facts) < 2 ? 'Hanya satu pilihan sebelumnya yang masih tersedia. Pilih properti lain untuk perbandingan.' : 'Berikut perbandingan '.count($facts).' properti yang masih tersedia.')
-                : 'Saya menemukan '.count($facts).' properti tersedia.');
-        if (! $isComparison && $listings->isNotEmpty() && ! array_filter($filters, fn ($value) => $value !== null && $value !== '')) {
-            $answer .= ' Ini adalah hasil yang paling baru diperbarui sebagai titik awal. Lokasi atau anggaran apa yang Anda inginkan?';
-        }
-        if ($listings->isEmpty()) {
-            $answer .= match ($explanation['question'] ?? 'none') {
-                'budget' => ' Berapa anggaran Anda?', 'location' => ' Lokasi mana yang Anda cari?', 'type' => ' Tipe properti apa yang Anda cari?', default => '',
-            };
-        }
-
-        return [
-            'answer' => $answer,
-            'mode' => $isComparison ? 'compare' : 'search',
-            'listings' => $listings->map(function (Listing $listing) use ($keys): array {
-                $facts = $this->facts($listing);
-                $facts['reason'] = $this->reason($facts, $keys);
-                $facts['url'] = route('properties.show', $listing);
-
-                return $facts;
-            })->all(),
-            'catalog_url' => route('properties.index'),
-        ];
+        return $this->payload($answer, $isComparison ? 'compare' : 'search', $facts, $contacts);
     }
 
-    /** @return array<string, mixed> */
-    private function facts(Listing $listing): array
+    /** @param  list<int>  $lastIds */
+    private function fallback(SearchListings $search, CompareListings $compare, SalesContacts $contacts, array $lastIds, int $found): string
     {
-        return [
-            'id' => $listing->id, 'code' => $listing->code, 'title' => $listing->title,
-            'type' => $listing->type, 'price_idr' => $listing->price_idr,
-            'price_formatted' => 'Rp'.number_format($listing->price_idr, 0, ',', '.'),
-            'city' => $listing->city, 'district' => $listing->district,
-            'land_area_m2' => $listing->land_area_m2, 'building_area_m2' => $listing->building_area_m2,
-            'rooms' => $listing->rooms,
-            'facilities' => array_slice((array) $listing->facilities, 0, 5),
-        ];
+        return match (true) {
+            $search->listingIds !== null => $found ? "Saya menemukan {$found} properti tersedia." : 'Tidak ada properti yang cocok saat ini. Coba longgarkan kriteria di katalog.',
+            $compare->listingIds !== null => match (true) {
+                ! $lastIds => 'Belum ada hasil untuk dibandingkan. Cari properti terlebih dahulu.',
+                $found === 0 => 'Pilihan sebelumnya tidak lagi tersedia. Cari ulang di katalog.',
+                $found === 1 => 'Hanya satu pilihan sebelumnya yang masih tersedia. Pilih properti lain untuk perbandingan.',
+                default => "Berikut perbandingan {$found} properti yang masih tersedia.",
+            },
+            $contacts->sales !== null => 'Berikut kontak sales yang dapat Anda hubungi.',
+            default => 'Maaf, saya belum bisa menjawab itu. Ceritakan properti yang Anda cari atau gunakan filter katalog.',
+        };
     }
 
     /**
-     * @param  array<string, mixed>  $facts
-     * @param  list<string>  $keys
+     * @param  list<array<string, mixed>>  $listings
+     * @return array<string, mixed>
      */
-    private function reason(array $facts, array $keys): string
+    private function payload(string $answer, string $mode = 'search', array $listings = [], ?SalesContacts $contacts = null): array
     {
-        $parts = [];
-        foreach (array_slice($keys, 0, 3) as $key) {
-            $value = match ($key) {
-                'location' => trim(($facts['district'] ?: '').', '.($facts['city'] ?: ''), ', '),
-                'price' => $facts['price_formatted'], 'type' => ucfirst($facts['type']),
-                'land' => $facts['land_area_m2'] ? $facts['land_area_m2'].' m² tanah' : null,
-                'building' => $facts['building_area_m2'] ? $facts['building_area_m2'].' m² bangunan' : null,
-                'rooms' => $facts['rooms'] ? $facts['rooms'].' kamar' : null,
-                'facilities' => implode(', ', $facts['facilities']), default => null,
-            };
-            if ($value) {
-                $parts[] = $value;
-            }
-        }
+        $listing = $contacts?->listing;
 
-        return $parts ? implode(' · ', $parts) : 'Lihat detail properti untuk informasi lengkap.';
+        return [
+            'answer' => $answer,
+            'mode' => $mode,
+            'listings' => $listings,
+            'contacts' => ($contacts?->sales ?? collect())->map(fn (User $sales) => [
+                'name' => $sales->name, 'whatsapp_url' => $sales->whatsappUrl($listing), 'email' => $sales->contact_email,
+            ])->all(),
+            'catalog_url' => route('properties.index'),
+            'contacts_url' => $listing ? route('properties.show', $listing).'#kontak' : route('home').'#tim-sales',
+        ];
     }
 }

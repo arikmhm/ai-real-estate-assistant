@@ -5,13 +5,15 @@ namespace App\Console\Commands;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 
 class SeedKudusSales extends Command
 {
+    // Aman hanya karena perintah ini menolak berjalan di luar APP_ENV=local.
+    private const DEV_PASSWORD = '12345678';
+
     protected $signature = 'demo:seed-kudus-sales';
 
-    protected $description = 'Buat tiga akun sales sintetis hanya di development lokal';
+    protected $description = 'Buat tiga akun sales sintetis berkontak publik hanya di development lokal';
 
     public function handle(): int
     {
@@ -21,10 +23,11 @@ class SeedKudusSales extends Command
             return self::FAILURE;
         }
 
+        // Synthetic contacts: the +62800 prefix is not an Indonesian mobile range, so wa.me links reach no real person.
         $profiles = [
-            ['name' => 'Alya Puspitasari', 'email' => 'alya.puspitasari@example.test'],
-            ['name' => 'Bagas Pradana', 'email' => 'bagas.pradana@example.test'],
-            ['name' => 'Rizky Mahendra', 'email' => 'rizky.mahendra@example.test'],
+            ['name' => 'Alya Puspitasari', 'email' => 'alya.puspitasari@example.test', 'whatsapp_number' => '+628000000001'],
+            ['name' => 'Bagas Pradana', 'email' => 'bagas.pradana@example.test', 'whatsapp_number' => '+628000000002'],
+            ['name' => 'Rizky Mahendra', 'email' => 'rizky.mahendra@example.test', 'whatsapp_number' => '+628000000003'],
         ];
 
         // Check every address before creating anything, so a collision cannot leave a partial set.
@@ -46,25 +49,24 @@ class SeedKudusSales extends Command
                 continue;
             }
 
-            $password = Str::random(32);
             User::create([
                 'name' => $profile['name'],
                 'email' => $profile['email'],
-                'password' => $password,
+                'password' => self::DEV_PASSWORD,
                 'role' => UserRole::Sales,
                 'is_active' => true,
-                'whatsapp_number' => null,
-                'contact_email' => null,
-                'public_contact_approved' => false,
+                'whatsapp_number' => $profile['whatsapp_number'],
+                'contact_email' => $profile['email'],
+                'public_contact_approved' => true,
             ]);
 
             $created++;
-            $this->line("{$profile['email']} | kata sandi: {$password}");
+            $this->line("{$profile['email']} | kata sandi: ".self::DEV_PASSWORD);
         }
 
         $this->info($created > 0
-            ? 'Akun sales development siap. Simpan kata sandi yang baru ditampilkan secara privat.'
-            : 'Semua akun sales development sudah ada; tidak ada kata sandi baru.');
+            ? 'Akun sales development siap.'
+            : 'Semua akun sales development sudah ada; tidak ada akun baru.');
 
         return self::SUCCESS;
     }

@@ -24,7 +24,7 @@
         <div data-assistant-messages role="log" aria-live="polite" class="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4 text-sm">
             <div class="max-w-[85%] self-start rounded-2xl rounded-bl-sm bg-stone-100 px-3.5 py-2.5">Halo! Ceritakan properti yang Anda cari. Harga dan ketersediaan diperiksa saat Anda bertanya.</div>
             <div data-assistant-suggestions class="flex flex-wrap gap-2">
-                @foreach (['Cari rumah di Kudus di bawah 700 juta', 'Bandingkan pilihan tadi'] as $suggestion)
+                @foreach (['Cari rumah di Kudus di bawah 700 juta', 'Bandingkan pilihan tadi', 'Kontak sales untuk pilihan pertama'] as $suggestion)
                     <button type="button" data-assistant-suggestion class="rounded-full border border-stone-200 px-3 py-1.5 text-xs text-stone-700 hover:border-stone-950">{{ $suggestion }}</button>
                 @endforeach
             </div>

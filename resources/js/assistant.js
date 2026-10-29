@@ -69,20 +69,44 @@ if (root) {
                 body.append(tr);
             }
             table.append(body); wrapper.append(table); messages.append(wrapper);
-            scrollDown();
-            return;
+        } else {
+            for (const listing of data.listings || []) {
+                const card = document.createElement('div');
+                card.className = 'max-w-[85%] self-start rounded-2xl border border-stone-200 px-3.5 py-2.5';
+                card.append(link(listing.title, listing.url));
+                const detail = document.createElement('p');
+                detail.className = 'mt-1 text-xs text-stone-600';
+                detail.textContent = `${listing.price_formatted} · ${listing.district || listing.city || 'Lokasi belum dicatat'} · ${listing.code}`;
+                card.append(detail);
+                messages.append(card);
+            }
         }
-        for (const listing of data.listings || []) {
+        if (data.listings?.length) messages.append(moreLink('Lihat semua di katalog', data.catalog_url));
+        for (const contact of data.contacts || []) {
             const card = document.createElement('div');
-            card.className = 'max-w-[85%] self-start rounded-2xl border border-stone-200 px-3.5 py-2.5';
-            card.append(link(listing.title, listing.url));
-            const detail = document.createElement('p');
-            detail.className = 'mt-1 text-xs text-stone-600';
-            detail.textContent = `${listing.price_formatted} · ${listing.district || listing.city || 'Lokasi belum dicatat'} · ${listing.reason}`;
-            card.append(detail);
+            card.className = 'flex max-w-[85%] flex-wrap items-center gap-x-3 gap-y-1.5 self-start rounded-2xl border border-stone-200 px-3.5 py-2.5';
+            const name = document.createElement('p');
+            name.className = 'w-full font-medium';
+            name.textContent = contact.name;
+            const whatsapp = link(`WhatsApp ${contact.name}`, contact.whatsapp_url);
+            whatsapp.className = 'rounded-full bg-brand px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-strong';
+            whatsapp.target = '_blank';
+            whatsapp.rel = 'noopener noreferrer';
+            card.append(name, whatsapp);
+            if (contact.email) {
+                const email = link(`Email ${contact.name}`, `mailto:${contact.email}`);
+                email.className = 'text-xs text-stone-600 underline underline-offset-2';
+                card.append(email);
+            }
             messages.append(card);
         }
+        if (data.contacts?.length) messages.append(moreLink('Lihat semua sales', data.contacts_url));
         scrollDown();
+    };
+    const moreLink = (label, url) => {
+        const anchor = link(label, url);
+        anchor.className = 'self-start text-xs text-stone-600 underline underline-offset-2 hover:text-stone-950';
+        return anchor;
     };
     const render = () => {
         panel.hidden = !ui.open;
@@ -146,7 +170,8 @@ if (root) {
             if (!response.ok) throw new Error(data.error || 'Asisten tidak tersedia.');
             showResults(data);
             state.history = [...state.history, message].slice(-4);
-            state.lastListingIds = (data.listings || []).map(item => item.id).slice(0, 3);
+            // Only a new search replaces the positions that "pilihan 1–3" refer to.
+            if (data.mode === 'search' && data.listings?.length) state.lastListingIds = data.listings.map(item => item.id).slice(0, 3);
             save();
         } catch (error) {
             typing.remove();
