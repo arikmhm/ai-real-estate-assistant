@@ -39,8 +39,11 @@ class PublicContactsTest extends TestCase
         Listing::factory()->create(['publication_status' => 'published', 'availability_status' => 'sold', 'city' => 'Pati']);
         User::factory()->create(['name' => 'Alya Puspitasari', 'whatsapp_number' => '+6281234567890', 'public_contact_approved' => true, 'avatar_path' => 'images/sales/avatar-04.webp']);
         User::factory()->create(['name' => 'Sales Nonaktif', 'is_active' => false, 'whatsapp_number' => '+628111111111', 'public_contact_approved' => true]);
+        User::factory()->create(['name' => 'Sales Belum Disetujui', 'whatsapp_number' => '+6281299998888', 'public_contact_approved' => false]);
 
         $this->get('/')->assertOk()
+            ->assertSee('+62 812-3456-7890')
+            ->assertSee('Sales Belum Disetujui')->assertDontSee('9999')
             ->assertSee(asset('images/sales/avatar-04.webp'), false)
             ->assertSee(asset('images/home/hero.webp'), false)
             ->assertSee('content="'.asset('images/og-default.jpg').'"', false)

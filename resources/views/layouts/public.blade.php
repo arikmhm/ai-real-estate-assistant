@@ -28,14 +28,7 @@
                 <a href="{{ route('home') }}#tim-sales" class="hover:text-stone-950">Tim sales</a>
                 <a href="{{ route('home') }}#faq" class="hover:text-stone-950">FAQ</a>
             </nav>
-            <div class="flex shrink-0 items-center gap-4 whitespace-nowrap text-sm">
-                @auth
-                    <a href="{{ route('dashboard') }}" class="hidden text-stone-600 hover:text-stone-950 sm:inline">Area staf</a>
-                @else
-                    <a href="{{ route('login') }}" class="hidden text-stone-600 hover:text-stone-950 sm:inline">Masuk staf</a>
-                @endauth
-                <a href="{{ route('properties.index') }}" class="rounded-full border border-stone-300 px-4 py-2 font-medium hover:border-stone-950">Cari properti</a>
-            </div>
+            <a href="{{ route('properties.index') }}" class="shrink-0 whitespace-nowrap rounded-full border border-stone-300 px-4 py-2 text-sm font-medium hover:border-stone-950">Cari properti</a>
         </div>
     </header>
     <main>@yield('content')</main>
@@ -52,9 +45,7 @@
                 <a href="{{ route('properties.index') }}" class="hover:text-stone-950">Semua properti</a>
                 <a href="{{ route('home') }}#cara-kerja" class="hover:text-stone-950">Cara kerja</a>
                 <a href="{{ route('home') }}#tim-sales" class="hover:text-stone-950">Tim sales</a>
-                <a href="{{ route('home') }}#faq" class="hover:text-stone-950">FAQ</a>
-                <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="hover:text-stone-950">{{ auth()->check() ? 'Area staf' : 'Masuk staf' }}</a>
-            </nav>
+                <a href="{{ route('home') }}#faq" class="hover:text-stone-950">FAQ</a>            </nav>
             <p class="text-sm text-stone-500">Informasi diperbarui oleh tim kami. Harga dan ketersediaan dapat berubah sewaktu-waktu.</p>
         </div>
         <div class="mx-auto flex max-w-7xl justify-between border-t border-stone-200 px-4 py-6 text-xs text-stone-500 md:px-8">
