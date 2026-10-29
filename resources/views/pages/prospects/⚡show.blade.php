@@ -197,7 +197,7 @@ new #[Title('Detail prospek')] class extends Component {
 
 @php($prospect = Prospect::visibleTo(auth()->user())->with(['listing', 'owner', 'activities.actor', 'visits'])->findOrFail($prospectId))
 <div class="mx-auto max-w-5xl space-y-7 p-6">
-    <flux:button :href="route('prospects.index')" variant="ghost">← Prospek</flux:button>
+    <flux:button :href="route('prospects.index')" variant="ghost" icon="arrow-left">Prospek</flux:button>
     @if (session('status'))<flux:callout variant="success">{{ session('status') }}</flux:callout>@endif
     <div><flux:heading size="xl">{{ $prospect->name }}</flux:heading><flux:text>{{ $prospect->phone_e164 }} · {{ $prospect->source }}</flux:text></div>
     <div class="grid gap-4 rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 md:grid-cols-2">
@@ -263,8 +263,8 @@ new #[Title('Detail prospek')] class extends Component {
                 <article class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
                     <p class="text-sm font-medium">{{ ucfirst(str_replace('_', ' ', $activity->type)) }} · {{ $activity->actor->name }} · {{ $activity->created_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') }}</p>
                     @if ($activity->body)<p class="mt-1 whitespace-pre-line text-sm">{{ $activity->body }}</p>@endif
-                    @if ($activity->type === 'stage_changed')<p class="text-xs text-zinc-500">{{ ucfirst($activity->details['from']) }} → {{ ucfirst($activity->details['to']) }}</p>@endif
-                    @if ($activity->type === 'owner_changed')<p class="text-xs text-zinc-500">{{ $activity->details['from_name'] ?? 'Sales #'.$activity->details['from'] }} → {{ $activity->details['to_name'] ?? 'Sales #'.$activity->details['to'] }}</p>@endif
+                    @if ($activity->type === 'stage_changed')<p class="text-xs text-zinc-500">{{ ucfirst($activity->details['from']) }} <flux:icon.arrow-right variant="micro" class="inline size-3 align-middle" /> {{ ucfirst($activity->details['to']) }}</p>@endif
+                    @if ($activity->type === 'owner_changed')<p class="text-xs text-zinc-500">{{ $activity->details['from_name'] ?? 'Sales #'.$activity->details['from'] }} <flux:icon.arrow-right variant="micro" class="inline size-3 align-middle" /> {{ $activity->details['to_name'] ?? 'Sales #'.$activity->details['to'] }}</p>@endif
                 </article>
             @empty
                 <p class="text-sm text-zinc-500">Belum ada aktivitas.</p>

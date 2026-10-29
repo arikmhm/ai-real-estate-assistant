@@ -64,3 +64,33 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* Animasi buka/tutup <details>; browser tanpa ::details-content tetap membuka tanpa animasi. */
+details.accordion {
+    interpolate-size: allow-keywords;
+}
+
+details.accordion::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition: block-size 0.3s ease, content-visibility 0.3s allow-discrete;
+}
+
+details.accordion[open]::details-content {
+    block-size: auto;
+}
+
+/* Dua lengan chevron berputar 90° pada titik tengahnya sendiri: v berubah bentuk menjadi ^. */
+.accordion-chevron line {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.3s ease;
+}
+
+details[open] > summary .accordion-chevron-left {
+    transform: rotate(-90deg);
+}
+
+details[open] > summary .accordion-chevron-right {
+    transform: rotate(90deg);
+}

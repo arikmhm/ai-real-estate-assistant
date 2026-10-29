@@ -14,7 +14,7 @@ class PublicContactsTest extends TestCase
     public function test_detail_lists_all_active_sales_but_only_approved_contacts_have_links(): void
     {
         $first = Listing::factory()->create(['publication_status' => 'published']);
-        $second = Listing::factory()->create(['publication_status' => 'published', 'availability_status' => 'sold']);
+        $second = Listing::factory()->create(['publication_status' => 'published', 'availability_status' => 'reserved']);
         User::factory()->create(['name' => 'Alya Puspitasari', 'whatsapp_number' => '+6281234567890', 'contact_email' => 'alya@example.test', 'public_contact_approved' => true]);
         User::factory()->create(['name' => 'Bagas Pradana', 'whatsapp_number' => null, 'public_contact_approved' => false]);
         User::factory()->create(['name' => 'Sales Nonaktif', 'is_active' => false, 'whatsapp_number' => '+628111111111', 'public_contact_approved' => true]);

@@ -29,7 +29,7 @@ new #[Title('Inventaris properti')] class extends Component {
     <div class="grid gap-4 md:grid-cols-2">
         @forelse ($listings as $listing)
             <article class="rounded-xl border border-zinc-200 p-5 dark:border-zinc-700">
-                <div class="text-sm text-zinc-500">{{ $listing->code }} · {{ ucfirst($listing->publication_status) }} · {{ ucfirst($listing->availability_status) }}</div>
+                <div class="text-sm text-zinc-500">{{ $listing->code }} · {{ ucfirst($listing->publication_status) }} · {{ $listing->availability_label }}</div>
                 <h2 class="mt-2 text-lg font-semibold">{{ $listing->title }}</h2>
                 <p class="text-sm text-zinc-600 dark:text-zinc-300">{{ ucfirst($listing->type) }} · {{ $listing->city }}, {{ $listing->province }}</p>
                 <div class="mt-4 flex gap-3">

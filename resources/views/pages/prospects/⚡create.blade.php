@@ -77,7 +77,7 @@ new #[Title('Tambah prospek')] class extends Component {
 }; ?>
 
 <div class="mx-auto max-w-3xl space-y-6 p-6">
-    <flux:button :href="route('prospects.index')" variant="ghost">← Prospek</flux:button>
+    <flux:button :href="route('prospects.index')" variant="ghost" icon="arrow-left">Prospek</flux:button>
     <div><flux:heading size="xl">Tambah prospek</flux:heading><flux:text>Catat permintaan yang diterima di luar aplikasi.</flux:text></div>
     <form wire:submit="save" class="grid gap-4 rounded-xl border border-zinc-200 p-5 dark:border-zinc-700 md:grid-cols-2">
         <flux:select wire:model="listingId" label="Properti" required>

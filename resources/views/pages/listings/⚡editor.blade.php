@@ -200,7 +200,7 @@ new #[Title('Editor properti')] class extends Component {
 }; ?>
 
 <div class="mx-auto max-w-5xl space-y-6 p-6">
-    <flux:button :href="route('listings.index')" variant="ghost">← Inventaris</flux:button>
+    <flux:button :href="route('listings.index')" variant="ghost" icon="arrow-left">Inventaris</flux:button>
     <flux:heading size="xl">{{ $listingId ? 'Ubah properti' : 'Tambah properti' }}</flux:heading>
     @if (session('status'))<flux:callout variant="success">{{ session('status') }}</flux:callout>@endif
     <form wire:submit="save" class="grid gap-4 rounded-xl border border-zinc-200 p-6 md:grid-cols-2 dark:border-zinc-700">
@@ -258,7 +258,7 @@ new #[Title('Editor properti')] class extends Component {
         </section>
         <section class="space-y-3 rounded-xl border border-zinc-200 p-6 dark:border-zinc-700">
             <flux:heading size="lg">Status</flux:heading>
-            <p>{{ ucfirst($current->publication_status) }} · {{ ucfirst($current->availability_status) }}</p>
+            <p>{{ ucfirst($current->publication_status) }} · {{ $current->availability_label }}</p>
             @error('publication')<p class="text-red-600">{{ $message }}</p>@enderror
             @error('availability')<p class="text-red-600">{{ $message }}</p>@enderror
             <div class="flex flex-wrap gap-2">
@@ -276,7 +276,7 @@ new #[Title('Editor properti')] class extends Component {
             @php($statusLabels = ['draft' => 'Draf', 'published' => 'Terbit', 'archived' => 'Arsip', 'available' => 'Tersedia', 'reserved' => 'Dipesan', 'sold' => 'Terjual'])
             @forelse ($current->statusChanges()->with('actor')->get() as $change)
                 <div class="rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-700">
-                    <p class="font-medium">{{ $change->field === 'availability_status' ? 'Ketersediaan' : 'Publikasi' }}: {{ $statusLabels[$change->from_value] }} → {{ $statusLabels[$change->to_value] }}</p>
+                    <p class="font-medium">{{ $change->field === 'availability_status' ? 'Ketersediaan' : 'Publikasi' }}: {{ $statusLabels[$change->from_value] }} <flux:icon.arrow-right variant="micro" class="inline size-3 align-middle" /> {{ $statusLabels[$change->to_value] }}</p>
                     <p class="text-zinc-500">{{ $change->actor->name }} · {{ $change->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB</p>
                 </div>
             @empty

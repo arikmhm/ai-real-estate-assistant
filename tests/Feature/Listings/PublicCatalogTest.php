@@ -3,6 +3,7 @@
 namespace Tests\Feature\Listings;
 
 use App\Models\Listing;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -73,9 +74,9 @@ class PublicCatalogTest extends TestCase
             ->assertSee('<meta name="description"', false);
     }
 
-    public function test_installment_calculator_uses_current_price_on_all_published_details(): void
+    public function test_installment_calculator_uses_current_price_on_available_and_reserved_details(): void
     {
-        foreach (['available', 'reserved', 'sold'] as $status) {
+        foreach (['available', 'reserved'] as $status) {
             $listing = Listing::factory()->create([
                 'publication_status' => 'published', 'availability_status' => $status, 'price_idr' => 900000000,
             ]);
@@ -94,6 +95,39 @@ class PublicCatalogTest extends TestCase
         $archived = Listing::factory()->create(['publication_status' => 'archived']);
         $this->get(route('properties.show', $draft))->assertNotFound();
         $this->get(route('properties.show', $archived))->assertNotFound();
+    }
+
+    public function test_sold_detail_drops_contact_and_calculator_hides_from_search_and_suggests_similar(): void
+    {
+        $sold = Listing::factory()->create(['publication_status' => 'published', 'availability_status' => 'sold', 'city' => 'Kudus']);
+        Listing::factory()->create(['title' => 'Serupa Kudus', 'publication_status' => 'published', 'city' => 'Kudus']);
+        Listing::factory()->create(['title' => 'Serupa Pati', 'publication_status' => 'published', 'city' => 'Pati']);
+        Listing::factory()->create(['title' => 'Beda Tipe', 'publication_status' => 'published', 'type' => 'tanah', 'land_area_m2' => 100]);
+        Listing::factory()->create(['title' => 'Serupa Draf', 'city' => 'Kudus']);
+        Listing::factory()->create(['title' => 'Serupa Terjual', 'publication_status' => 'published', 'availability_status' => 'sold', 'city' => 'Kudus']);
+        User::factory()->create(['name' => 'Alya Puspitasari', 'whatsapp_number' => '+6281234567890', 'public_contact_approved' => true]);
+
+        $this->get(route('properties.show', $sold))->assertOk()
+            ->assertSee('Properti ini sudah terjual')->assertSee('Lihat properti tersedia')
+            ->assertDontSee('Hubungi sales')->assertDontSee('Alya Puspitasari')->assertDontSee('wa.me/', false)
+            ->assertDontSee('data-mortgage-calculator', false)
+            ->assertSee('<meta name="robots" content="noindex, follow">', false)
+            ->assertSeeInOrder(['Properti serupa yang masih tersedia', 'Serupa Kudus', 'Serupa Pati'])
+            ->assertDontSee('Beda Tipe')->assertDontSee('Serupa Draf')->assertDontSee('Serupa Terjual');
+    }
+
+    public function test_reserved_and_available_details_keep_contact_and_indexing_and_only_reserved_suggests_similar(): void
+    {
+        User::factory()->create(['name' => 'Alya Puspitasari', 'whatsapp_number' => '+6281234567890', 'public_contact_approved' => true]);
+        Listing::factory()->create(['title' => 'Alternatif Tersedia', 'publication_status' => 'published']);
+        $reserved = Listing::factory()->create(['publication_status' => 'published', 'availability_status' => 'reserved']);
+        $available = Listing::factory()->create(['publication_status' => 'published']);
+
+        $this->get(route('properties.show', $reserved))->assertOk()
+            ->assertSee('Hubungi sales')->assertSee('wa.me/6281234567890', false)->assertSee('data-mortgage-calculator', false)
+            ->assertDontSee('name="robots"', false)->assertSee('Properti serupa yang masih tersedia')->assertSee('Alternatif Tersedia');
+        $this->get(route('properties.show', $available))->assertOk()
+            ->assertSee('Hubungi sales')->assertDontSee('name="robots"', false)->assertDontSee('Properti serupa');
     }
 
     public function test_catalog_shows_clear_empty_state_and_paginates(): void

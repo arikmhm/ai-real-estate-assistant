@@ -27,7 +27,7 @@ class ListingStatusHistoryTest extends TestCase
         Livewire::test('pages::listings.editor', ['listing' => $listing])
             ->call('setAvailability', 'reserved')
             ->assertHasNoErrors()
-            ->assertSee('Tersedia → Dipesan')
+            ->assertSeeInOrder(['Tersedia', 'Dipesan'])
             ->assertSee('Admin Audit · 28/10/2026 09:00');
 
         $this->assertSame('reserved', $listing->fresh()->availability_status);

@@ -16,9 +16,9 @@ new #[Title('Detail inventaris')] class extends Component {
 }; ?>
 
 <div class="mx-auto max-w-4xl space-y-5 p-6">
-    <flux:button :href="route('listings.index')" variant="ghost">← Inventaris</flux:button>
+    <flux:button :href="route('listings.index')" variant="ghost" icon="arrow-left">Inventaris</flux:button>
     <flux:heading size="xl">{{ $listing->title }}</flux:heading>
-    <flux:text>{{ $listing->code }} · {{ ucfirst($listing->publication_status) }} · {{ ucfirst($listing->availability_status) }}</flux:text>
+    <flux:text>{{ $listing->code }} · {{ ucfirst($listing->publication_status) }} · {{ $listing->availability_label }}</flux:text>
     <p>Rp {{ number_format($listing->price_idr, 0, ',', '.') }} · {{ ucfirst($listing->type) }} · {{ $listing->city }}, {{ $listing->province }}</p>
     @if ($listing->description)<p class="whitespace-pre-line">{{ $listing->description }}</p>@endif
     @if ($listing->land_area_m2)<p>Luas tanah: {{ $listing->land_area_m2 }} m²</p>@endif

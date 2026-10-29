@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AvailabilityStatus;
 use Database\Factories\ListingFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -48,6 +49,16 @@ class Listing extends Model
         return 'PR-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
     }
 
+    public function getAvailabilityLabelAttribute(): string
+    {
+        return AvailabilityStatus::from($this->availability_status)->label();
+    }
+
+    public function isSold(): bool
+    {
+        return $this->availability_status === AvailabilityStatus::Sold->value;
+    }
+
     /** @return HasMany<ListingMedia, $this> */
     public function media(): HasMany
     {
@@ -76,6 +87,18 @@ class Listing extends Model
     public function scopePublicDetail(Builder $query): Builder
     {
         return $query->where('publication_status', 'published');
+    }
+
+    /**
+     * Same type, same city first; used on the reserved/sold detail page.
+     *
+     * @return Builder<Listing>
+     */
+    public function similar(int $limit = 3): Builder
+    {
+        return static::publicCatalog()->with('media')
+            ->where('id', '!=', $this->id)->where('type', $this->type)
+            ->orderByRaw('(city = ?) desc', [$this->city])->latest()->limit($limit);
     }
 
     public function canPublish(): bool

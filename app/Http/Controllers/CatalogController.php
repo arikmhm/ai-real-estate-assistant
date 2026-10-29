@@ -80,9 +80,12 @@ class CatalogController extends Controller
 
     public function show(string $slug): View
     {
+        $listing = Listing::publicDetail()->with('media')->where('slug', $slug)->firstOrFail();
+
         return view('public.show', [
-            'listing' => Listing::publicDetail()->with('media')->where('slug', $slug)->firstOrFail(),
+            'listing' => $listing,
             'salesContacts' => User::activeSales()->orderBy('name')->get(),
+            'similar' => $listing->availability_status === 'available' ? collect() : $listing->similar()->get(),
         ]);
     }
 }

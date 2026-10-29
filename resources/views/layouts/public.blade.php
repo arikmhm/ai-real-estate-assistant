@@ -7,6 +7,9 @@
     <meta name="description" content="@yield('description', 'Jelajahi properti yang tersedia dari satu katalog agensi.')">
     <meta property="og:title" content="@yield('title', 'Katalog Properti')">
     <meta property="og:description" content="@yield('description', 'Jelajahi properti yang tersedia dari satu katalog agensi.')">
+    @hasSection('robots')
+        <meta name="robots" content="@yield('robots')">
+    @endif
     @hasSection('image')
         <meta property="og:image" content="@yield('image')">
     @endif
