@@ -155,7 +155,7 @@
 
                     <h3 class="mt-5 text-sm font-medium">Status publikasi</h3>
                     <dl class="mt-2 grid grid-cols-3 gap-2 text-sm">
-                        @foreach (['draft' => 'Draf', 'published' => 'Terbit', 'archived' => 'Arsip'] as $status => $label)
+                        @foreach (App\Models\Listing::PUBLICATION_LABELS as $status => $label)
                             <div class="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800/60">
                                 <dt class="text-xs text-zinc-500">{{ $label }}</dt>
                                 <dd class="font-semibold tabular-nums">{{ $publicationCounts[$status] }}</dd>

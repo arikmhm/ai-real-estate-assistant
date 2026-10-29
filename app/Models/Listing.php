@@ -15,6 +15,8 @@ class Listing extends Model
     /** @use HasFactory<ListingFactory> */
     use HasFactory;
 
+    public const PUBLICATION_LABELS = ['draft' => 'Draf', 'published' => 'Terbit', 'archived' => 'Arsip'];
+
     protected $fillable = [
         'title', 'type', 'price_idr', 'province', 'city', 'district', 'address',
         'latitude', 'longitude', 'land_area_m2', 'building_area_m2', 'rooms',
@@ -47,6 +49,11 @@ class Listing extends Model
     public function getCodeAttribute(): string
     {
         return 'PR-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
+
+    public function getPublicationLabelAttribute(): string
+    {
+        return self::PUBLICATION_LABELS[$this->publication_status] ?? $this->publication_status;
     }
 
     public function getAvailabilityLabelAttribute(): string

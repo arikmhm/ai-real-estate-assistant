@@ -17,7 +17,11 @@ class SearchListings implements Tool
 
     private const NUMBER_FILTERS = ['price_min', 'price_max', 'land_min', 'land_max', 'building_min', 'building_max', 'rooms_min'];
 
-    /** Null until the model calls this tool. @var list<int>|null */
+    /**
+     * Null until the model calls this tool.
+     *
+     * @var list<int>|null
+     */
     public ?array $listingIds = null;
 
     public function __construct(private readonly ListingSearch $search) {}
@@ -59,7 +63,7 @@ class SearchListings implements Tool
         }
 
         $listings = $this->search->query($validator->validated())->orderByDesc('updated_at')->limit(3)->get();
-        $this->listingIds = $listings->pluck('id')->all();
+        $this->listingIds = array_values($listings->map(fn (Listing $listing) => $listing->id)->all());
 
         return self::describe($listings);
     }

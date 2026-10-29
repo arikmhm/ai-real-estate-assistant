@@ -45,7 +45,7 @@ class AssistantGuard
             }
         }
         preg_match_all('/(\d+(?:[.,]\d+)?)\s?(?:m²|m2|meter persegi)|(\d+)\s?kamar/iu', $text, $stated);
-        foreach (array_filter(array_merge($stated[1], $stated[2]), 'strlen') as $value) {
+        foreach (array_filter(array_merge($stated[1], $stated[2]), fn (string $value) => $value !== '') as $value) {
             if (! in_array(self::number($value), $numbers, false)) {
                 return false;
             }
@@ -61,7 +61,7 @@ class AssistantGuard
         $amounts = [];
         foreach ($matches as $match) {
             $unit = strtolower($match[3] ?? '');
-            if ($unit === '' && ($match[1] ?? '') === '') {
+            if ($unit === '' && $match[1] === '') {
                 continue;
             }
             $amounts[] = $unit === ''

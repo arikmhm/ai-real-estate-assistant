@@ -76,10 +76,16 @@ Tiga akun sales sintetis (email `@example.test`, WhatsApp sintetis `+62800…` y
 php artisan demo:seed-kudus-sales
 ```
 
-Setelah listing, sales, dan admin ada, isi riwayat CRM sintetis (±80 prospek Mei–Oktober, aktivitas, ±50 kunjungan termasuk agenda 10 hari ke depan). Seeder ini memundurkan `created_at` listing, menandai rumah termurah terjual dan berikutnya dipesan, tetapi tidak menambah listing, akun, atau media. Ia menolak berjalan di luar `APP_ENV=local` atau bila tabel prospek sudah berisi:
+Setelah listing, sales, dan admin ada, isi riwayat CRM sintetis: ±80 prospek selama enam bulan terakhir, aktivitas, dan kunjungan, termasuk minimal dua kunjungan terjadwal per sales dalam 10 hari ke depan. Seeder ini memundurkan `created_at` listing serta menandai rumah termurah terjual dan rumah berikutnya dipesan. Listing, akun, dan media tidak ditambah. Perintah ini menolak berjalan di luar `APP_ENV=local` atau bila tabel prospek sudah berisi (`php artisan db:seed` setara):
 
 ```bash
-php artisan db:seed
+php artisan demo:seed-crm
+```
+
+Tanggal dihitung relatif terhadap waktu seed, jadi agenda dan tindak lanjut menua seiring waktu. Sebelum demo atau mengambil screenshot, segarkan data dengan `--fresh`. Opsi ini menghapus semua prospek, aktivitas, kunjungan, dan riwayat status listing, mengembalikan ketersediaan listing ke tersedia, lalu mengisi ulang. Semuanya dalam satu transaksi.
+
+```bash
+php artisan demo:seed-crm --fresh
 ```
 
 ## Asisten AI demo

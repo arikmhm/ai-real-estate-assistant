@@ -1,11 +1,14 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/livewire-starter-kit",
+    "name": "arikmhm/aditamaland-property",
     "type": "project",
-    "description": "The official Laravel starter kit for Livewire.",
+    "description": "Property sales platform with a public catalog, AI property assistant, mortgage calculator, and internal inventory, CRM, and visit management.",
     "keywords": [
         "laravel",
-        "framework"
+        "livewire",
+        "real-estate",
+        "crm",
+        "ai-assistant"
     ],
     "license": "MIT",
     "require": {

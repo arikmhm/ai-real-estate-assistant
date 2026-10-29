@@ -13,7 +13,11 @@ use Stringable;
 
 class SalesContacts implements Tool
 {
-    /** Null until contacts are looked up. @var Collection<int, User>|null */
+    /**
+     * Null until contacts are looked up.
+     *
+     * @var Collection<int, User>|null
+     */
     public ?Collection $sales = null;
 
     public ?Listing $listing = null;

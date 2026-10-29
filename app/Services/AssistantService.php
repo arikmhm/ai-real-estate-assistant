@@ -42,8 +42,8 @@ class AssistantService
         // A listing may change while Gemini is responding. Use the latest public rows for output.
         $ids = $search->listingIds ?: $compare->listingIds ?: [];
         $latest = Listing::publicCatalog()->whereIn('id', $ids)->get()->keyBy('id');
-        $facts = collect($ids)->map(fn (int $id) => $latest->get($id))->filter()
-            ->map(fn (Listing $listing) => $listing->assistantFacts() + ['url' => route('properties.show', $listing)])->values()->all();
+        $facts = array_values(collect($ids)->map(fn (int $id) => $latest->get($id))->filter()
+            ->map(fn (Listing $listing) => $listing->assistantFacts() + ['url' => route('properties.show', $listing)])->all());
 
         // A contact request already answered by SalesContacts is never "data not recorded".
         if ($scope === 'data_tidak_tersedia' && $contacts->sales === null) {
@@ -92,7 +92,7 @@ class AssistantService
             'answer' => $answer,
             'mode' => $mode,
             'listings' => $listings,
-            'contacts' => ($contacts?->sales ?? collect())->map(fn (User $sales) => [
+            'contacts' => ($contacts->sales ?? collect())->map(fn (User $sales) => [
                 'name' => $sales->name, 'whatsapp_url' => $sales->whatsappUrl($listing), 'email' => $sales->contact_email,
             ])->all(),
             'catalog_url' => route('properties.index'),

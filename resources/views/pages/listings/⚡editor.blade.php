@@ -258,7 +258,7 @@ new #[Title('Editor properti')] class extends Component {
         </section>
         <section class="space-y-3 rounded-xl border border-zinc-200 p-6 dark:border-zinc-700">
             <flux:heading size="lg">Status</flux:heading>
-            <p>{{ ucfirst($current->publication_status) }} · {{ $current->availability_label }}</p>
+            <p>{{ $current->publication_label }} · {{ $current->availability_label }}</p>
             @error('publication')<p class="text-red-600">{{ $message }}</p>@enderror
             @error('availability')<p class="text-red-600">{{ $message }}</p>@enderror
             <div class="flex flex-wrap gap-2">
@@ -273,10 +273,10 @@ new #[Title('Editor properti')] class extends Component {
         <section class="space-y-3 rounded-xl border border-zinc-200 p-6 dark:border-zinc-700">
             <flux:heading size="lg">Riwayat status</flux:heading>
             <flux:text>Perubahan sejak pencatatan riwayat diaktifkan.</flux:text>
-            @php($statusLabels = ['draft' => 'Draf', 'published' => 'Terbit', 'archived' => 'Arsip', 'available' => 'Tersedia', 'reserved' => 'Dipesan', 'sold' => 'Terjual'])
+            @php($statusLabel = fn (string $value) => App\Models\Listing::PUBLICATION_LABELS[$value] ?? App\Enums\AvailabilityStatus::from($value)->label())
             @forelse ($current->statusChanges()->with('actor')->get() as $change)
                 <div class="rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-700">
-                    <p class="font-medium">{{ $change->field === 'availability_status' ? 'Ketersediaan' : 'Publikasi' }}: {{ $statusLabels[$change->from_value] }} <flux:icon.arrow-right variant="micro" class="inline size-3 align-middle" /> {{ $statusLabels[$change->to_value] }}</p>
+                    <p class="font-medium">{{ $change->field === 'availability_status' ? 'Ketersediaan' : 'Publikasi' }}: {{ $statusLabel($change->from_value) }} <flux:icon.arrow-right variant="micro" class="inline size-3 align-middle" /> {{ $statusLabel($change->to_value) }}</p>
                     <p class="text-zinc-500">{{ $change->actor->name }} · {{ $change->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB</p>
                 </div>
             @empty

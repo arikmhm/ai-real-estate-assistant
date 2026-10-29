@@ -62,7 +62,7 @@ new #[Title('Inventaris properti')] class extends Component {
                         <flux:table.cell align="end" class="tabular-nums">{{ $listing->land_area_m2 ? (float) $listing->land_area_m2 : '–' }} / {{ $listing->building_area_m2 ? (float) $listing->building_area_m2 : '–' }} m²</flux:table.cell>
                         <flux:table.cell align="end" class="tabular-nums">{{ $listing->rooms ?? '–' }} / {{ $listing->bathrooms ?? '–' }}</flux:table.cell>
                         <flux:table.cell>
-                            <flux:badge size="sm" :color="['draft' => 'zinc', 'published' => 'green', 'archived' => 'amber'][$listing->publication_status] ?? 'zinc'">{{ ['draft' => 'Draf', 'published' => 'Terbit', 'archived' => 'Arsip'][$listing->publication_status] ?? $listing->publication_status }}</flux:badge>
+                            <flux:badge size="sm" :color="['draft' => 'zinc', 'published' => 'green', 'archived' => 'amber'][$listing->publication_status] ?? 'zinc'">{{ $listing->publication_label }}</flux:badge>
                         </flux:table.cell>
                         <flux:table.cell>
                             <flux:badge size="sm" :color="['available' => 'sky', 'reserved' => 'orange', 'sold' => 'emerald'][$listing->availability_status] ?? 'zinc'">{{ $listing->availability_label }}</flux:badge>

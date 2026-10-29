@@ -11,7 +11,11 @@ use Stringable;
 
 class CompareListings implements Tool
 {
-    /** Null until the model calls this tool. @var list<int>|null */
+    /**
+     * Null until the model calls this tool.
+     *
+     * @var list<int>|null
+     */
     public ?array $listingIds = null;
 
     /** @param  list<int>  $lastIds */
@@ -45,7 +49,7 @@ class CompareListings implements Tool
         $ids = array_values(array_filter(array_map(fn (int $position) => $this->lastIds[$position - 1] ?? null, $positions)));
         $current = Listing::publicCatalog()->whereIn('id', $ids)->get()->keyBy('id');
         $listings = collect($ids)->map(fn (int $id) => $current->get($id))->filter()->values();
-        $this->listingIds = $listings->pluck('id')->all();
+        $this->listingIds = array_values($listings->map(fn (Listing $listing) => $listing->id)->all());
 
         return $listings->isEmpty() ? 'Pilihan sebelumnya tidak lagi tersedia.' : SearchListings::describe($listings);
     }

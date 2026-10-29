@@ -78,6 +78,9 @@ class DemoSeeder extends Seeder
 
     private int $upcomingVisits = 0;
 
+    /** @var array<int, int> upcoming visits per sales id */
+    private array $upcomingByOwner = [];
+
     private Carbon $now;
 
     /** @var list<string> */
@@ -160,6 +163,20 @@ class DemoSeeder extends Seeder
                 'actor_id' => $admin->id, 'field' => 'availability_status',
                 'from_value' => $from, 'to_value' => $to, 'created_at' => $at->copy()->addHour()->utc(),
             ]);
+        }
+
+        // Every sales gets at least two booked surveys so each personal agenda has something on it.
+        foreach ($sales as $owner) {
+            $open = Prospect::query()->with('listing')->where('owner_id', $owner->id)
+                ->whereIn('stage', ['dihubungi', 'kunjungan', 'negosiasi'])
+                ->whereDoesntHave('visits', fn ($query) => $query->where('status', 'dijadwalkan'))
+                ->orderByDesc('created_at')->orderBy('id')->get();
+            foreach ($open as $prospect) {
+                if (($this->upcomingByOwner[$owner->id] ?? 0) >= 2) {
+                    break;
+                }
+                $this->visits($prospect, $prospect->listing, $owner, $this->now->copy(), true, true);
+            }
         }
     }
 
@@ -244,14 +261,12 @@ class DemoSeeder extends Seeder
     }
 
     /** Creates the visit(s) for reaching the "kunjungan" stage and returns when the stage moved on. */
-    private function visits(Prospect $prospect, Listing $listing, User $owner, Carbon $stageAt, bool $mayBeUpcoming): Carbon
+    private function visits(Prospect $prospect, Listing $listing, User $owner, Carbon $stageAt, bool $mayBeUpcoming, bool $forceUpcoming = false): Carbon
     {
-        $upcoming = $mayBeUpcoming && $this->faker->boolean(70);
-        // The first few booked surveys land today so the agenda always has something on it.
+        $upcoming = $mayBeUpcoming && ($forceUpcoming || $this->faker->boolean(70));
         $scheduledAt = $upcoming
-            ? $this->now->addDays($this->upcomingVisits++ < 3 ? 0 : $this->faker->numberBetween(1, 9))
-            : $stageAt->addDays($this->faker->numberBetween(1, 4));
-        $scheduledAt = $scheduledAt->setTime($this->faker->numberBetween(9, 15), $this->faker->randomElement([0, 30]));
+            ? $this->upcomingSlot()
+            : $stageAt->addDays($this->faker->numberBetween(1, 4))->setTime($this->faker->numberBetween(9, 15), $this->faker->randomElement([0, 30]));
         if (! $upcoming && $scheduledAt->gt($this->now)) {
             $scheduledAt = $this->now->copy()->subDay()->setTime(10, 0);
         }
@@ -272,8 +287,20 @@ class DemoSeeder extends Seeder
         return $upcoming ? $stageAt : $stageAt->max($scheduledAt->copy()->addHours(4));
     }
 
+    /** Survey time between 09.00 and 15.30 WIB; the first few land later today while office hours remain. */
+    private function upcomingSlot(): Carbon
+    {
+        $today = $this->upcomingVisits++ < 3 && $this->now->hour < 14;
+        $day = $this->now->addDays($today ? 0 : $this->faker->numberBetween(1, 9));
+
+        return $day->setTime($this->faker->numberBetween($today ? $this->now->hour + 1 : 9, 15), $this->faker->randomElement([0, 30]));
+    }
+
     private function visit(Prospect $prospect, Listing $listing, User $owner, Carbon $bookedAt, Carbon $scheduledAt, string $status): void
     {
+        if ($status === 'dijadwalkan') {
+            $this->upcomingByOwner[$owner->id] = ($this->upcomingByOwner[$owner->id] ?? 0) + 1;
+        }
         $bookedAt = $bookedAt->min($this->now);
         $visit = Visit::query()->forceCreate([
             'prospect_id' => $prospect->id, 'listing_id' => $listing->id,
