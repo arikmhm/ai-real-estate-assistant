@@ -1,18 +1,62 @@
 # Aditamaland Property
 
-Platform penjualan properti Aditamaland Property ("Harga minimalis, kualitas maksimalis"): katalog publik dengan filter, asisten AI, dan simulasi cicilan, serta area internal admin/sales untuk inventaris, CRM, kunjungan, dan dashboard. Dibangun dengan Laravel 13, Livewire, dan PostgreSQL. Dokumen kebutuhan, arsitektur, dan roadmap disimpan hanya pada lingkungan kerja lokal.
+**Harga minimalis, kualitas maksimalis.** Platform penjualan properti yang menyatukan katalog publik, asisten AI, simulasi cicilan, serta area kerja admin dan sales dalam satu aplikasi Laravel.
 
-## Prasyarat
+![Beranda Aditamaland Property](docs/screenshots/01-beranda.png)
 
-- PHP 8.3+ dengan `pdo_pgsql`, Composer 2, Node/npm, dan Docker Compose.
-- Terverifikasi 26 Oktober 2026: PHP 8.5.0, Composer 2.10.3, Node 24.22.1, npm 11.19.1, PostgreSQL 16 dalam Docker.
-- Bila binari Herd Lite dan NVM tidak ada di PATH shell:
+## Masalah dan solusi
+
+Pembeli properti biasanya memperoleh info harga dan ketersediaan dari brosur atau chat yang cepat basi. Mereka harus menghitung cicilan sendiri dan tidak tahu harus menghubungi sales yang mana. Di sisi pengembang, inventaris, prospek, dan jadwal survei tersebar di spreadsheet dan WhatsApp pribadi.
+
+Aditamaland Property menjawabnya dengan satu sumber data:
+
+- **Untuk pembeli**
+  - Katalog dengan filter lokasi, tipe, harga, luas, dan kamar.
+  - Asisten AI yang mencari dan membandingkan listing langsung dari database.
+  - Simulasi cicilan di halaman detail.
+  - Tombol WhatsApp ke sales yang sudah disetujui admin.
+- **Untuk tim internal**
+  - Inventaris dengan foto, status publikasi/ketersediaan, dan riwayat status.
+  - CRM prospek dengan tahap penjualan dan aktivitas.
+  - Agenda kunjungan dan tindak lanjut.
+  - Dashboard per peran.
+
+## Tampilan
+
+| Katalog dengan filter | Detail dan simulasi cicilan |
+|---|---|
+| ![Katalog](docs/screenshots/02-katalog.png) | ![Simulasi cicilan](docs/screenshots/03-detail-cicilan.png) |
+| **Properti terjual** | **Dashboard admin** |
+| ![Properti terjual](docs/screenshots/05-terjual.png) | ![Dashboard admin](docs/screenshots/10-dashboard-admin.png) |
+| **Dashboard sales** | **Inventaris** |
+| ![Dashboard sales](docs/screenshots/11-dashboard-sales.png) | ![Inventaris](docs/screenshots/12-inventaris.png) |
+| **Riwayat status listing** | **Daftar prospek** |
+| ![Riwayat status](docs/screenshots/13-riwayat-status.png) | ![Prospek](docs/screenshots/14-prospek.png) |
+| **Detail prospek dan aktivitas** | **Kunjungan dan tindak lanjut** |
+| ![Detail prospek](docs/screenshots/15-prospek-detail.png) | ![Kunjungan](docs/screenshots/16-kunjungan.png) |
+| **Staf sales** | **Tambah sales** |
+| ![Staf sales](docs/screenshots/17-staf.png) | ![Tambah sales](docs/screenshots/18-staf-modal.png) |
+
+## Sorotan teknis
+
+- **Asisten AI berbasis tool calling.** Model tidak mengarang data; jawabannya diambil dari tool pencarian, perbandingan, dan kontak sales yang membaca database. Guardrail menolak topik di luar properti, dan rate limit menjaga kuota.
+- **Hak akses per peran.** Admin mengelola inventaris dan staf. Sales hanya melihat prospek dan kunjungannya sendiri.
+- **Simulasi cicilan anuitas** dihitung di browser, dengan tes tersendiri.
+- **Teruji:** tes fitur PHPUnit, analisis statis PHPStan, dan format kode Pint.
+
+**Stack:** Laravel 13, Livewire 4 + Flux, Tailwind CSS 4, PostgreSQL 16, Cloudflare R2, Gemini (Laravel AI SDK).
+
+## Menjalankan lokal
+
+### Prasyarat
+
+PHP 8.3+ dengan `pdo_pgsql`, Composer 2, Node/npm, dan Docker Compose. Bila binari Herd Lite dan NVM tidak ada di PATH shell:
 
 ```bash
 export PATH="$HOME/.config/herd-lite/bin:$HOME/.nvm/versions/node/v24.22.1/bin:$PATH"
 ```
 
-## Menjalankan proyek
+### Setup
 
 ```bash
 docker compose up -d db
@@ -26,73 +70,72 @@ php artisan storage:link
 php artisan serve
 ```
 
-Aplikasi di `http://127.0.0.1:8000`, database lokal di `127.0.0.1:55432`. Nilai di `compose.yaml` dan `.env.example` hanya untuk pengembangan lokal; `.env` diabaikan Git.
+Aplikasi berjalan di `http://127.0.0.1:8000` dan database lokal di `127.0.0.1:55432`. Nilai di `compose.yaml` dan `.env.example` hanya untuk pengembangan lokal.
 
-Pendaftaran publik dinonaktifkan. Buat admin pertama secara interaktif (kata sandi diminta tersembunyi; jangan taruh di argumen shell atau repository):
+Pendaftaran publik dinonaktifkan. Buat admin pertama secara interaktif; kata sandi diminta tersembunyi:
 
 ```bash
 php artisan users:create-admin
 ```
 
-## Fitur dan alamat
-
 | Alamat | Isi | Akses |
 |---|---|---|
-| `/`, `/properti`, `/properti/{slug}` | Beranda, katalog dengan filter GET, detail | Publik |
-| `/staff` | Akun sales, kontak WhatsApp/email publik dan persetujuannya | Admin |
-| `/listings` | Inventaris, media, status publikasi/ketersediaan, riwayat status | Admin kelola, sales baca |
-| `/prospects`, `/visits` | CRM prospek, aktivitas, tahap, kunjungan | Sales miliknya, admin semua |
+| `/`, `/properti`, `/properti/{slug}` | Beranda, katalog, detail | Publik |
 | `/dashboard` | Ringkasan per peran | Admin, sales |
+| `/listings` | Inventaris, media, status, riwayat status | Admin kelola, sales baca |
+| `/prospects`, `/visits` | Prospek, aktivitas, kunjungan | Sales miliknya, admin semua |
+| `/staff` | Akun dan kontak sales | Admin |
 
-Detail properti tersedia dan dipesan menampilkan sales aktif serta simulasi cicilan; properti terjual menyembunyikan keduanya. Tombol WhatsApp hanya muncul setelah admin menyetujui nomor sales. Aturan bisnis lengkap ada di PRD lokal.
+### Data demo
 
-## Media dan Cloudflare R2
-
-`PROPERTY_MEDIA_DISK=public` memakai disk lokal; `PROPERTY_MEDIA_DISK=r2` memakai Cloudflare R2. Untuk R2, isi `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT` (endpoint S3 sesuai yurisdiksi bucket), dan `R2_PUBLIC_URL` di `.env`. Bucket development yang sudah diuji: `R2_BUCKET=ai-real-estate-assistant`, `R2_PUBLIC_URL=https://ai-real-estate-assistant-storage.arikmhm.com`. Pakai **Access Key ID** dan **Secret Access Key** dari token R2 berizin Object Read & Write untuk bucket itu, bukan **Token value** Cloudflare API. Setelah mengubah konfigurasi, jalankan `php artisan config:clear` dan mulai ulang server. URL media pada custom domain bersifat publik, termasuk untuk listing draf.
-
-Pratinjau objek yatim, lalu hapus hanya setelah hasilnya diperiksa:
-
-```bash
-php artisan listings:prune-media --disk=r2
-php artisan listings:prune-media --disk=r2 --delete
-```
-
-Aplikasi menerima maksimal 10 MB per foto/denah, tetapi batas PHP bawaan (2 MB per file, 8 MB per request) memotong unggahan lebih dulu. Di Herd Lite, atur `upload_max_filesize=16M` dan `post_max_size=256M` di `$HOME/.config/herd-lite/bin/php.ini`, periksa dengan `php -i | grep -E 'upload_max_filesize|post_max_size'`, lalu mulai ulang server.
-
-## Data demo Kudus
-
-Delapan listing sintetis Kudus (aset dan manifest di `database/demo/kudus/`) membutuhkan `APP_ENV=local` dan `PROPERTY_MEDIA_DISK=r2`:
+Delapan listing sintetis Kudus (aset di `database/demo/kudus/`) membutuhkan `APP_ENV=local` dan `PROPERTY_MEDIA_DISK=r2`. `--check` memeriksa tanpa unggah; `--apply` aman diulang. Setelah aset sumber berubah, `--apply --replace` mengganti media kedelapan listing.
 
 ```bash
 php artisan demo:import-kudus --check
+```
+
+```bash
 php artisan demo:import-kudus --apply
 ```
 
-`--check` memeriksa manifest, 32 WebP, database, dan koneksi R2 tanpa unggah. `--apply` aman diulang: melanjutkan listing parsial tanpa menggandakan yang lengkap, dan berhenti pada listing yang punya media manual tambahan. Setelah aset sumber berubah, `--apply --replace` mengganti media kedelapan listing.
-
-Tiga akun sales sintetis (email `@example.test`, WhatsApp sintetis `+62800…` yang disetujui tampil publik) dibuat dengan perintah berikut. Kata sandinya tetap untuk development dan tertulis di `app/Console/Commands/SeedKudusSales.php`; perintah menolak berjalan di luar `APP_ENV=local` dan melewati akun yang sudah ada.
+Tiga akun sales sintetis (email `@example.test`, WhatsApp `+62800…`). Kata sandi development tertulis di `app/Console/Commands/SeedKudusSales.php`.
 
 ```bash
 php artisan demo:seed-kudus-sales
 ```
 
-Setelah listing, sales, dan admin ada, isi riwayat CRM sintetis: ±80 prospek selama enam bulan terakhir, aktivitas, dan kunjungan, termasuk minimal dua kunjungan terjadwal per sales dalam 10 hari ke depan. Seeder ini memundurkan `created_at` listing serta menandai rumah termurah terjual dan rumah berikutnya dipesan. Listing, akun, dan media tidak ditambah. Perintah ini menolak berjalan di luar `APP_ENV=local` atau bila tabel prospek sudah berisi (`php artisan db:seed` setara):
-
-```bash
-php artisan demo:seed-crm
-```
-
-Tanggal dihitung relatif terhadap waktu seed, jadi agenda dan tindak lanjut menua seiring waktu. Sebelum demo atau mengambil screenshot, segarkan data dengan `--fresh`. Opsi ini menghapus semua prospek, aktivitas, kunjungan, dan riwayat status listing, mengembalikan ketersediaan listing ke tersedia, lalu mengisi ulang. Semuanya dalam satu transaksi.
+Riwayat CRM sintetis: sekitar 80 prospek selama enam bulan, beserta aktivitas dan kunjungan. Tanggal dihitung relatif terhadap waktu seed, jadi segarkan dengan `--fresh` sebelum demo. Opsi ini mengganti semua prospek, aktivitas, kunjungan, dan riwayat status dalam satu transaksi.
 
 ```bash
 php artisan demo:seed-crm --fresh
 ```
 
-## Asisten AI demo
+### Media Cloudflare R2
 
-Widget chat di kanan bawah halaman publik, hanya untuk lingkungan lokal dengan data sintetis. Isi `GEMINI_API_KEY` dan `AI_ASSISTANT_ENABLED=true` di `.env`, jalankan `php artisan config:clear`, lalu mulai ulang server. Model tetap `gemini-3.5-flash-lite` tanpa fallback; batas aplikasi 5 pesan global/menit, 10/IP/jam, 100 global/hari WIB. Jangan buka untuk pengunjung nyata pada tier gratis sebelum keputusan privasi dan kuota dibuat.
+`PROPERTY_MEDIA_DISK=public` memakai disk lokal; `PROPERTY_MEDIA_DISK=r2` memakai R2. Isi `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT`, dan `R2_PUBLIC_URL` di `.env`. Gunakan Access Key ID dan Secret dari token R2 berizin Object Read & Write, bukan token Cloudflare API. Lalu jalankan `php artisan config:clear` dan mulai ulang server. URL media pada custom domain bersifat publik.
 
-## Tes dan pemeriksaan
+Pratinjau objek yatim, lalu hapus hanya setelah hasilnya diperiksa:
+
+```bash
+php artisan listings:prune-media --disk=r2
+```
+
+```bash
+php artisan listings:prune-media --disk=r2 --delete
+```
+
+Batas unggah aplikasi 10 MB per file. Naikkan batas PHP (`upload_max_filesize=16M`, `post_max_size=256M`) bila memakai bawaan 2 MB.
+
+### Asisten AI
+
+Widget chat muncul di halaman publik, khusus lingkungan lokal. Isi `GEMINI_API_KEY` dan `AI_ASSISTANT_ENABLED=true` di `.env`, jalankan `php artisan config:clear`, lalu mulai ulang server.
+
+Batas aplikasi:
+- 5 pesan global per menit;
+- 10 pesan per IP per jam;
+- 100 pesan global per hari (WIB).
+
+### Tes
 
 Buat database uji sekali setelah container PostgreSQL berjalan:
 
@@ -100,21 +143,14 @@ Buat database uji sekali setelah container PostgreSQL berjalan:
 docker compose exec -T db psql -U real_estate -d real_estate -c 'CREATE DATABASE real_estate_test'
 ```
 
-`phpunit.xml` memakai `real_estate_test`, bukan database aplikasi. Jalankan Pint, PHPStan, dan PHPUnit, lalu tes kalkulator cicilan:
+Pint, PHPStan, dan PHPUnit:
 
 ```bash
 composer test
 ```
 
+Tes kalkulator cicilan:
+
 ```bash
 npm run test:calc
 ```
-
-PHPStan dapat menampilkan peringatan ekstensi turbo pada PHP Herd Lite berbasis musl; pemeriksaannya tetap lulus.
-
-## Referensi Laravel resmi
-
-- [Instalasi Laravel 13](https://laravel.com/docs/13.x/installation)
-- [Starter kit dan autentikasi](https://laravel.com/docs/13.x/starter-kits)
-- [Konfigurasi database](https://laravel.com/docs/13.x/database)
-- [Pengujian](https://laravel.com/docs/13.x/testing)
