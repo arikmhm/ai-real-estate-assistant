@@ -184,14 +184,14 @@ new #[Title('Staf sales')] class extends Component {
                         <flux:table.cell variant="strong">
                             <div class="flex items-center gap-3">
                                 <flux:avatar size="sm" :name="$sales->name" :initials="$sales->initials()" :src="$sales->avatar_path ? asset($sales->avatar_path) : null" />
-                                <div>
+                                <div class="min-w-0">
                                     {{ $sales->name }}
-                                    <span class="block text-xs font-normal text-zinc-500">{{ $sales->email }}</span>
+                                    <span class="block max-w-40 truncate text-xs font-normal text-zinc-500" title="{{ $sales->email }}">{{ $sales->email }}</span>
                                 </div>
                             </div>
                         </flux:table.cell>
                         <flux:table.cell class="tabular-nums">{{ $sales->whatsapp_number ?: 'Belum diisi' }}</flux:table.cell>
-                        <flux:table.cell>{{ $sales->contact_email ?: '–' }}</flux:table.cell>
+                        <flux:table.cell><span class="block max-w-44 truncate" title="{{ $sales->contact_email }}">{{ $sales->contact_email ?: '–' }}</span></flux:table.cell>
                         <flux:table.cell>
                             <flux:badge size="sm" :color="$sales->public_contact_approved ? 'green' : 'zinc'">{{ $sales->public_contact_approved ? 'Disetujui' : 'Belum disetujui' }}</flux:badge>
                         </flux:table.cell>

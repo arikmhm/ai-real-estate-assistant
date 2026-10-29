@@ -261,7 +261,7 @@ new #[Title('Detail prospek')] class extends Component {
         <div class="mt-6 space-y-3">
             @forelse ($prospect->activities->reverse() as $activity)
                 <article class="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800">
-                    <p class="text-sm font-medium">{{ ucfirst(str_replace('_', ' ', $activity->type)) }} · {{ $activity->actor->name }} · {{ $activity->created_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') }}</p>
+                    <p class="text-sm font-medium">{{ \App\Models\ProspectActivity::TYPE_LABELS[$activity->type] ?? $activity->type }} · {{ $activity->actor->name }} · {{ $activity->created_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') }}</p>
                     @if ($activity->body)<p class="mt-1 whitespace-pre-line text-sm">{{ $activity->body }}</p>@endif
                     @if ($activity->type === 'stage_changed')<p class="text-xs text-zinc-500">{{ ucfirst($activity->details['from']) }} <flux:icon.arrow-right variant="micro" class="inline size-3 align-middle" /> {{ ucfirst($activity->details['to']) }}</p>@endif
                     @if ($activity->type === 'owner_changed')<p class="text-xs text-zinc-500">{{ $activity->details['from_name'] ?? 'Sales #'.$activity->details['from'] }} <flux:icon.arrow-right variant="micro" class="inline size-3 align-middle" /> {{ $activity->details['to_name'] ?? 'Sales #'.$activity->details['to'] }}</p>@endif

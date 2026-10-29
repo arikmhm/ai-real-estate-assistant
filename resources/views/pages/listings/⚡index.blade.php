@@ -30,7 +30,6 @@ new #[Title('Inventaris properti')] class extends Component {
         <flux:table>
             <flux:table.columns>
                 <flux:table.column>Properti</flux:table.column>
-                <flux:table.column>Jenis</flux:table.column>
                 <flux:table.column>Kecamatan</flux:table.column>
                 <flux:table.column align="end">Harga</flux:table.column>
                 <flux:table.column align="end">LT / LB</flux:table.column>
@@ -51,12 +50,11 @@ new #[Title('Inventaris properti')] class extends Component {
                                     <span class="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-400 dark:bg-zinc-800"><flux:icon.photo variant="mini" /></span>
                                 @endif
                                 <span class="min-w-0">
-                                    <span class="block max-w-64 truncate hover:underline">{{ $listing->title }}</span>
-                                    <span class="block text-xs font-normal text-zinc-500">{{ $listing->code }}</span>
+                                    <span class="block max-w-56 truncate hover:underline">{{ $listing->title }}</span>
+                                    <span class="block text-xs font-normal text-zinc-500">{{ $listing->code }} · {{ ucfirst($listing->type) }}</span>
                                 </span>
                             </a>
                         </flux:table.cell>
-                        <flux:table.cell>{{ ucfirst($listing->type) }}</flux:table.cell>
                         <flux:table.cell>{{ $listing->district ?? $listing->city }}</flux:table.cell>
                         <flux:table.cell align="end" variant="strong" class="tabular-nums">Rp{{ number_format($listing->price_idr, 0, ',', '.') }}</flux:table.cell>
                         <flux:table.cell align="end" class="tabular-nums">{{ $listing->land_area_m2 ? (float) $listing->land_area_m2 : '–' }} / {{ $listing->building_area_m2 ? (float) $listing->building_area_m2 : '–' }} m²</flux:table.cell>
@@ -77,7 +75,7 @@ new #[Title('Inventaris properti')] class extends Component {
                         </flux:table.cell>
                     </flux:table.row>
                 @empty
-                    <flux:table.row><flux:table.cell colspan="9">Belum ada properti.</flux:table.cell></flux:table.row>
+                    <flux:table.row><flux:table.cell colspan="8">Belum ada properti.</flux:table.cell></flux:table.row>
                 @endforelse
             </flux:table.rows>
         </flux:table>
