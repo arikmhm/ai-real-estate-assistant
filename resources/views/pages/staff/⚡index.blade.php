@@ -2,6 +2,7 @@
 
 use App\Enums\UserRole;
 use App\Models\User;
+use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -57,6 +58,7 @@ new #[Title('Staf sales')] class extends Component {
         ]);
 
         $this->reset('newName', 'newEmail', 'newWhatsAppNumber', 'newContactEmail', 'newPassword', 'newPasswordConfirmation');
+        Flux::modal('create-sales')->close();
         session()->flash('status', 'Akun sales dibuat. Sampaikan kata sandi sementara di luar aplikasi.');
     }
 
@@ -70,6 +72,7 @@ new #[Title('Staf sales')] class extends Component {
         $this->editEmail = $sales->email;
         $this->editWhatsAppNumber = $sales->whatsapp_number ?? '';
         $this->editContactEmail = $sales->contact_email ?? '';
+        Flux::modal('edit-sales')->show();
     }
 
     public function updateSales(): void
@@ -103,6 +106,7 @@ new #[Title('Staf sales')] class extends Component {
         $sales->save();
 
         $this->editingSalesId = null;
+        Flux::modal('edit-sales')->close();
         session()->flash('status', 'Profil sales diperbarui.');
     }
 
@@ -110,6 +114,7 @@ new #[Title('Staf sales')] class extends Component {
     {
         Gate::authorize('viewAny', User::class);
         $this->editingSalesId = null;
+        Flux::modal('edit-sales')->close();
     }
 
     public function toggleActive(int $salesId): void
@@ -141,17 +146,84 @@ new #[Title('Staf sales')] class extends Component {
     }
 }; ?>
 
-<div class="mx-auto max-w-5xl space-y-8 p-6">
-    <div>
-        <flux:heading size="xl">Staf sales</flux:heading>
-        <flux:text>Kelola akun dan kontak sales yang akan ditampilkan kepada pengunjung.</flux:text>
+<div class="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <flux:heading size="xl">Staf sales</flux:heading>
+            <flux:text>Kelola akun dan kontak sales yang akan ditampilkan kepada pengunjung.</flux:text>
+        </div>
+        <flux:modal.trigger name="create-sales">
+            <flux:button variant="primary" icon="plus">Tambah sales</flux:button>
+        </flux:modal.trigger>
     </div>
 
     @if (session('status'))
         <flux:callout variant="success">{{ session('status') }}</flux:callout>
     @endif
+    @error('contactApproval')<flux:callout variant="danger" role="alert">{{ $message }}</flux:callout>@enderror
 
-    <section class="rounded-xl border border-zinc-200 p-6 dark:border-zinc-700">
+    @php($salesList = User::where('role', UserRole::Sales->value)->withCount([
+        'ownedProspects as active_count' => fn ($query) => $query->whereNotIn('stage', ['berhasil', 'gagal']),
+        'ownedProspects as won_count' => fn ($query) => $query->whereIn('stage', ['booking', 'berhasil']),
+    ])->orderBy('name')->orderBy('id')->get())
+    <div class="rounded-xl border border-zinc-200 px-4 dark:border-zinc-700">
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>Sales</flux:table.column>
+                <flux:table.column>WhatsApp</flux:table.column>
+                <flux:table.column>Email kontak</flux:table.column>
+                <flux:table.column>Kontak publik</flux:table.column>
+                <flux:table.column>Status</flux:table.column>
+                <flux:table.column align="end">Prospek aktif</flux:table.column>
+                <flux:table.column align="end">Booking/berhasil</flux:table.column>
+                <flux:table.column align="end"><span class="sr-only">Aksi</span></flux:table.column>
+            </flux:table.columns>
+            <flux:table.rows>
+                @forelse ($salesList as $sales)
+                    <flux:table.row :key="$sales->id">
+                        <flux:table.cell variant="strong">
+                            <div class="flex items-center gap-3">
+                                <flux:avatar size="sm" :name="$sales->name" :initials="$sales->initials()" :src="$sales->avatar_path ? asset($sales->avatar_path) : null" />
+                                <div>
+                                    {{ $sales->name }}
+                                    <span class="block text-xs font-normal text-zinc-500">{{ $sales->email }}</span>
+                                </div>
+                            </div>
+                        </flux:table.cell>
+                        <flux:table.cell class="tabular-nums">{{ $sales->whatsapp_number ?: 'Belum diisi' }}</flux:table.cell>
+                        <flux:table.cell>{{ $sales->contact_email ?: '–' }}</flux:table.cell>
+                        <flux:table.cell>
+                            <flux:badge size="sm" :color="$sales->public_contact_approved ? 'green' : 'zinc'">{{ $sales->public_contact_approved ? 'Disetujui' : 'Belum disetujui' }}</flux:badge>
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            <flux:badge size="sm" :color="$sales->is_active ? 'sky' : 'red'">{{ $sales->is_active ? 'Aktif' : 'Nonaktif' }}</flux:badge>
+                        </flux:table.cell>
+                        <flux:table.cell align="end" class="tabular-nums">{{ $sales->active_count }}</flux:table.cell>
+                        <flux:table.cell align="end" class="tabular-nums">{{ $sales->won_count }}</flux:table.cell>
+                        <flux:table.cell align="end">
+                            <flux:dropdown position="bottom" align="end">
+                                <flux:button size="sm" variant="ghost" icon="ellipsis-horizontal" aria-label="Aksi untuk {{ $sales->name }}" />
+                                <flux:menu>
+                                    <flux:menu.item icon="pencil-square" wire:click="startEdit({{ $sales->id }})">Ubah profil</flux:menu.item>
+                                    <flux:menu.item icon="globe-alt" wire:click="toggleContactApproval({{ $sales->id }})" :disabled="! $sales->public_contact_approved && ! $sales->whatsapp_number">
+                                        {{ $sales->public_contact_approved ? 'Cabut kontak publik' : 'Setujui kontak publik' }}
+                                    </flux:menu.item>
+                                    <flux:menu.separator />
+                                    <flux:menu.item :icon="$sales->is_active ? 'no-symbol' : 'check-circle'" :variant="$sales->is_active ? 'danger' : 'default'" wire:click="toggleActive({{ $sales->id }})">
+                                        {{ $sales->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                                    </flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </flux:table.cell>
+                    </flux:table.row>
+                @empty
+                    <flux:table.row><flux:table.cell colspan="8">Belum ada akun sales.</flux:table.cell></flux:table.row>
+                @endforelse
+            </flux:table.rows>
+        </flux:table>
+    </div>
+
+    <flux:modal name="create-sales" class="w-full max-w-2xl">
         <flux:heading size="lg">Tambah sales</flux:heading>
         <form wire:submit="createSales" class="mt-5 grid gap-4 md:grid-cols-2">
             <flux:input wire:model="newName" label="Nama" required />
@@ -160,49 +232,24 @@ new #[Title('Staf sales')] class extends Component {
             <flux:input wire:model="newContactEmail" label="Email kontak publik (opsional)" type="email" />
             <flux:input wire:model="newPassword" label="Kata sandi sementara" type="password" required />
             <flux:input wire:model="newPasswordConfirmation" label="Ulangi kata sandi" type="password" required />
-            <div class="md:col-span-2"><flux:button type="submit" variant="primary">Buat akun sales</flux:button></div>
-        </form>
-    </section>
-
-    @if ($editingSalesId)
-        <section class="rounded-xl border border-zinc-200 p-6 dark:border-zinc-700">
-            <flux:heading size="lg">Ubah profil sales</flux:heading>
-            <form wire:submit="updateSales" class="mt-5 grid gap-4 md:grid-cols-2">
-                <flux:input wire:model="editName" label="Nama" required />
-                <flux:input wire:model="editEmail" label="Email login" type="email" required />
-                <flux:input wire:model="editWhatsAppNumber" label="WhatsApp (+628...)" />
-                <flux:input wire:model="editContactEmail" label="Email kontak publik (opsional)" type="email" />
-                <div class="flex gap-3 md:col-span-2">
-                    <flux:button type="submit" variant="primary">Simpan</flux:button>
-                    <flux:button type="button" wire:click="cancelEdit">Batal</flux:button>
-                </div>
-            </form>
-        </section>
-    @endif
-
-    <section class="space-y-3">
-        <flux:heading size="lg">Daftar sales</flux:heading>
-        @error('contactApproval')<p role="alert" class="text-sm text-red-700">{{ $message }}</p>@enderror
-        @forelse (User::where('role', UserRole::Sales->value)->orderBy('name')->get() as $sales)
-            <div wire:key="sales-{{ $sales->id }}" class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
-                <div>
-                    <div class="font-semibold">{{ $sales->name }} <span class="text-sm font-normal text-zinc-500">{{ $sales->is_active ? 'Aktif' : 'Nonaktif' }}</span></div>
-                    <div class="text-sm text-zinc-600 dark:text-zinc-300">{{ $sales->email }} · {{ $sales->whatsapp_number ?: 'WhatsApp belum diisi' }}</div>
-                    @if ($sales->contact_email)<div class="text-sm text-zinc-500">{{ $sales->contact_email }}</div>@endif
-                    <div class="text-sm text-zinc-500">Kontak publik: {{ $sales->public_contact_approved ? 'Disetujui' : 'Belum disetujui' }}</div>
-                </div>
-                <div class="flex gap-2">
-                    <flux:button wire:click="startEdit({{ $sales->id }})">Ubah</flux:button>
-                    <flux:button wire:click="toggleContactApproval({{ $sales->id }})" :disabled="! $sales->public_contact_approved && ! $sales->whatsapp_number">
-                        {{ $sales->public_contact_approved ? 'Cabut kontak publik' : 'Setujui kontak publik' }}
-                    </flux:button>
-                    <flux:button wire:click="toggleActive({{ $sales->id }})" :variant="$sales->is_active ? 'danger' : 'primary'">
-                        {{ $sales->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
-                    </flux:button>
-                </div>
+            <div class="flex justify-end gap-2 md:col-span-2">
+                <flux:modal.close><flux:button type="button" variant="ghost">Batal</flux:button></flux:modal.close>
+                <flux:button type="submit" variant="primary">Buat akun sales</flux:button>
             </div>
-        @empty
-            <flux:text>Belum ada akun sales.</flux:text>
-        @endforelse
-    </section>
+        </form>
+    </flux:modal>
+
+    <flux:modal name="edit-sales" class="w-full max-w-2xl" @close="cancelEdit">
+        <flux:heading size="lg">Ubah profil sales</flux:heading>
+        <form wire:submit="updateSales" class="mt-5 grid gap-4 md:grid-cols-2">
+            <flux:input wire:model="editName" label="Nama" required />
+            <flux:input wire:model="editEmail" label="Email login" type="email" required />
+            <flux:input wire:model="editWhatsAppNumber" label="WhatsApp (+628...)" />
+            <flux:input wire:model="editContactEmail" label="Email kontak publik (opsional)" type="email" />
+            <div class="flex justify-end gap-2 md:col-span-2">
+                <flux:button type="button" variant="ghost" wire:click="cancelEdit">Batal</flux:button>
+                <flux:button type="submit" variant="primary">Simpan</flux:button>
+            </div>
+        </form>
+    </flux:modal>
 </div>

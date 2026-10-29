@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\ProspectService;
 use App\Services\VisitService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\Paginator;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -193,6 +194,35 @@ class ProspectPagesTest extends TestCase
 
         $this->actingAs($other)->get('/visits')->assertOk()->assertDontSee('Lokasi rahasia')->assertDontSee($prospect->phone_e164);
         $this->actingAs($owner)->get('/visits')->assertOk()->assertSee('Lokasi rahasia')->assertSee($prospect->name);
+    }
+
+    public function test_visit_agenda_marks_outcome_for_owner_only(): void
+    {
+        $owner = User::factory()->create();
+        $other = User::factory()->create();
+        $listing = Listing::factory()->create(['publication_status' => 'published']);
+        $prospect = app(ProspectService::class)->create($owner, $this->data($listing));
+        $visit = app(VisitService::class)->create($owner, $prospect, ['scheduled_at' => '2026-11-05T10:00', 'location' => 'Lokasi unit', 'notes' => 'Bawa brosur']);
+
+        // Livewire skips restoring the static paginator view when a call aborts; keep later tests' links intact.
+        $views = [Paginator::$defaultView, Paginator::$defaultSimpleView];
+        try {
+            $this->actingAs($other);
+            Livewire::test('pages::visits.index')->call('markVisit', $visit->id, 'selesai')->assertForbidden();
+            $this->assertSame('dijadwalkan', $visit->fresh()->status);
+
+            $this->actingAs($owner);
+            Livewire::test('pages::visits.index')->call('markVisit', $visit->id, 'dijadwalkan')->assertStatus(422);
+        } finally {
+            Paginator::defaultView($views[0]);
+            Paginator::defaultSimpleView($views[1]);
+        }
+        Livewire::test('pages::visits.index')->call('markVisit', $visit->id, 'selesai');
+        $visit->refresh();
+        $this->assertSame('selesai', $visit->status);
+        $this->assertSame('2026-11-05 10:00', $visit->scheduled_at->timezone('Asia/Jakarta')->format('Y-m-d H:i'));
+        $this->assertSame(['Lokasi unit', 'Bawa brosur'], [$visit->location, $visit->notes]);
+        $this->assertSame(1, $prospect->activities()->where('type', 'visit_updated')->count());
     }
 
     private function data(Listing $listing, array $overrides = []): array

@@ -76,6 +76,12 @@ Tiga akun sales sintetis (email `@example.test`, WhatsApp sintetis `+62800…` y
 php artisan demo:seed-kudus-sales
 ```
 
+Setelah listing, sales, dan admin ada, isi riwayat CRM sintetis (±80 prospek Mei–Oktober, aktivitas, ±50 kunjungan termasuk agenda 10 hari ke depan). Seeder ini memundurkan `created_at` listing, menandai rumah termurah terjual dan berikutnya dipesan, tetapi tidak menambah listing, akun, atau media. Ia menolak berjalan di luar `APP_ENV=local` atau bila tabel prospek sudah berisi:
+
+```bash
+php artisan db:seed
+```
+
 ## Asisten AI demo
 
 Widget chat di kanan bawah halaman publik, hanya untuk lingkungan lokal dengan data sintetis. Isi `GEMINI_API_KEY` dan `AI_ASSISTANT_ENABLED=true` di `.env`, jalankan `php artisan config:clear`, lalu mulai ulang server. Model tetap `gemini-3.5-flash-lite` tanpa fallback; batas aplikasi 5 pesan global/menit, 10/IP/jam, 100 global/hari WIB. Jangan buka untuk pengunjung nyata pada tier gratis sebelum keputusan privasi dan kuota dibuat.

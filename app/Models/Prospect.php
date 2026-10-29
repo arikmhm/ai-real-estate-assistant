@@ -13,6 +13,12 @@ class Prospect extends Model
 {
     public const STAGES = ['baru', 'dihubungi', 'kunjungan', 'negosiasi', 'booking', 'berhasil', 'gagal'];
 
+    /** Flux badge colour per stage, shared by the dashboard, prospect, and visit pages. */
+    public const STAGE_COLORS = [
+        'baru' => 'zinc', 'dihubungi' => 'sky', 'kunjungan' => 'indigo', 'negosiasi' => 'amber',
+        'booking' => 'violet', 'berhasil' => 'green', 'gagal' => 'red',
+    ];
+
     protected $fillable = ['listing_id', 'owner_id', 'name', 'phone_e164', 'source', 'stage', 'followup_on'];
 
     protected function casts(): array
