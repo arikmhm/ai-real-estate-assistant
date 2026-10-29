@@ -23,16 +23,21 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    /* Warna merek Aditamaland: biru menara/penggaris logo, kuning hanya hiasan (kontrasnya rendah di atas putih). */
+    --color-brand: #2557c7;
+    --color-brand-strong: #2a4c9a;
+    --color-brand-accent: #f9ec00;
+
+    --color-accent: var(--color-brand);
+    --color-accent-content: var(--color-brand);
     --color-accent-foreground: var(--color-white);
 }
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-white);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
+        --color-accent: var(--color-brand);
+        --color-accent-content: #8aaef5;
+        --color-accent-foreground: var(--color-white);
     }
 }
 

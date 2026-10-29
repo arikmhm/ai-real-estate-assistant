@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
-@section('title', 'Temukan properti untuk langkah berikutnya')
-@section('description', 'Lihat rumah, tanah, dan bangunan kos yang tersedia dari katalog agensi.')
+@section('title', 'Harga minimalis, kualitas maksimalis')
+@section('description', 'Harga minimalis, kualitas maksimalis. Lihat rumah, tanah, dan bangunan kos yang tersedia di '.config('app.name').'.')
 
 @section('content')
     {{-- Hero --}}
@@ -9,12 +9,13 @@
         {{-- aset: foto hero. Saat foto dipasang, tambahkan overlay gelap dan ubah teks menjadi putih. --}}
         <div
             class="relative mx-auto flex min-h-[26rem] max-w-7xl flex-col items-center justify-center rounded-3xl bg-stone-200 px-6 pb-24 pt-16 text-center md:min-h-[36rem]">
-            <h1 class="max-w-3xl text-4xl font-medium leading-[1.05] tracking-tight md:text-6xl">Temukan properti yang sesuai
-                dengan rencana Anda</h1>
-            <p class="mt-5 max-w-xl text-stone-600">Harga dan ketersediaan langsung dari data agensi. Pilih sales favorit
-                Anda dan lanjutkan percakapan lewat WhatsApp.</p>
+            <span aria-hidden="true" class="mb-6 h-1.5 w-14 rounded-full bg-brand-accent"></span>
+            <h1 class="max-w-3xl text-4xl font-medium leading-[1.05] tracking-tight md:text-6xl">Harga minimalis, kualitas
+                maksimalis</h1>
+            <p class="mt-5 max-w-xl text-stone-600">Temukan properti yang sesuai dengan rencana Anda. Harga dan
+                ketersediaan langsung dari data kami; pilih sales favorit dan lanjutkan lewat WhatsApp.</p>
             <a href="{{ route('properties.index') }}"
-                class="mt-8 rounded-full bg-stone-950 px-6 py-3 text-sm font-medium text-white hover:bg-stone-800">Lihat
+                class="mt-8 rounded-full bg-brand px-6 py-3 text-sm font-medium text-white hover:bg-brand-strong">Lihat
                 properti</a>
         </div>
     </section>
@@ -64,7 +65,7 @@
                     class="text-xs text-stone-500 underline underline-offset-2 hover:text-stone-950 lg:hidden">Filter
                     lengkap</a>
                 <button type="submit"
-                    class="rounded-full bg-stone-950 px-6 py-3 text-sm font-medium text-white hover:bg-stone-800">Cari</button>
+                    class="rounded-full bg-brand px-6 py-3 text-sm font-medium text-white hover:bg-brand-strong">Cari</button>
             </div>
         </form>
     </section>
@@ -73,7 +74,7 @@
     <section class="mx-auto grid max-w-7xl gap-10 px-4 py-24 md:px-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div>
             <p class="text-2xl font-medium leading-snug tracking-tight md:text-3xl">Satu katalog untuk semua properti
-                agensi. <span class="text-stone-400">Setiap harga dan status diambil dari data terbaru, jadi yang Anda lihat
+                Aditamaland. <span class="text-stone-400">Setiap harga dan status diambil dari data terbaru, jadi yang Anda lihat
                     sama dengan yang ditawarkan sales.</span></p>
         </div>
         <dl class="grid grid-cols-3 gap-4 lg:grid-cols-1 lg:gap-6">
@@ -144,7 +145,7 @@
                                     {{ \Illuminate\Support\Str::limit(strip_tags($offer->description ?? ''), 160) }}</p>
                                 <div class="flex flex-wrap gap-2 pt-2">
                                     <a href="{{ route('properties.show', $offer) }}"
-                                        class="bg-stone-950 px-4 py-2.5 text-sm text-white hover:bg-stone-800">Lihat
+                                        class="bg-brand px-4 py-2.5 text-sm text-white hover:bg-brand-strong">Lihat
                                         detail</a>
                                     <a href="{{ route('properties.show', $offer) }}#mortgage-title"
                                         class="border border-stone-300 px-4 py-2.5 text-sm hover:border-stone-950">Simulasi
@@ -155,8 +156,7 @@
                                 class="grid grid-cols-3 gap-4 border-t border-stone-200 p-5 md:grid-cols-1 md:content-center md:border-l md:border-t-0 md:p-6">
                                 <div class="flex flex-col-reverse justify-end">
                                     <dt class="text-xs text-stone-400">Harga</dt>
-                                    <dd class="text-lg md:text-2xl">Rp
-                                        {{ number_format($offer->price_idr / 1000000, 0, ',', '.') }} jt</dd>
+                                    <dd class="text-lg md:text-2xl">Rp {{ number_format($offer->price_idr / 1000000, 0, ',', '.') }} jt</dd>
                                 </div>
                                 @if ($land > 0)
                                     <div class="flex flex-col-reverse justify-end">
@@ -165,8 +165,7 @@
                                     </div>
                                     <div class="flex flex-col-reverse justify-end">
                                         <dt class="text-xs text-stone-400">Harga per m²</dt>
-                                        <dd class="text-lg md:text-2xl">Rp
-                                            {{ number_format($offer->price_idr / $land / 1000, 0, ',', '.') }} rb</dd>
+                                        <dd class="text-lg md:text-2xl">Rp {{ number_format($offer->price_idr / $land / 1000, 0, ',', '.') }} rb</dd>
                                     </div>
                                 @endif
                             </dl>
@@ -228,7 +227,7 @@
             <h2 class="text-2xl tracking-tight md:text-3xl">Yang sering ditanyakan</h2>
         </div>
         <div class="mt-10 divide-y divide-stone-200 border-y border-stone-200">
-            @foreach ([['Bagaimana cara menghubungi sales?', 'Pilih sales di halaman ini atau di detail properti, lalu tekan tombol WhatsApp. Percakapan dan jadwal kunjungan diatur langsung bersama sales.'], ['Apakah harga dan ketersediaan selalu terbaru?', 'Katalog hanya menampilkan properti yang diterbitkan dan masih tersedia. Harga dan status dibaca dari data agensi setiap kali halaman dibuka.'], ['Apa itu simulasi cicilan?', 'Perkiraan pokok dan bunga per bulan dengan bunga tetap, dihitung di browser Anda. Hasilnya bukan penawaran atau persetujuan bank.'], ['Apakah saya perlu membuat akun?', 'Tidak. Anda dapat menjelajahi katalog, membuka detail, dan menghubungi sales tanpa mendaftar.']] as [$question, $answer])
+            @foreach ([['Bagaimana cara menghubungi sales?', 'Pilih sales di halaman ini atau di detail properti, lalu tekan tombol WhatsApp. Percakapan dan jadwal kunjungan diatur langsung bersama sales.'], ['Apakah harga dan ketersediaan selalu terbaru?', 'Katalog hanya menampilkan properti yang diterbitkan dan masih tersedia. Harga dan status dibaca dari data kami setiap kali halaman dibuka.'], ['Apa itu simulasi cicilan?', 'Perkiraan pokok dan bunga per bulan dengan bunga tetap, dihitung di browser Anda. Hasilnya bukan penawaran atau persetujuan bank.'], ['Apakah saya perlu membuat akun?', 'Tidak. Anda dapat menjelajahi katalog, membuka detail, dan menghubungi sales tanpa mendaftar.']] as [$question, $answer])
                 <details class="accordion group py-5">
                     <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                         {{ $question }}
@@ -249,7 +248,7 @@
                     saat Anda menemukan yang cocok.</p>
                 <div class="mt-8 flex flex-wrap gap-3">
                     <a href="{{ route('properties.index') }}"
-                        class="rounded-full bg-stone-950 px-6 py-3 text-sm font-medium text-white hover:bg-stone-800">Jelajahi
+                        class="rounded-full bg-brand px-6 py-3 text-sm font-medium text-white hover:bg-brand-strong">Jelajahi
                         properti</a>
                     <a href="#tim-sales"
                         class="rounded-full border border-stone-300 px-6 py-3 text-sm font-medium hover:border-stone-950">Hubungi

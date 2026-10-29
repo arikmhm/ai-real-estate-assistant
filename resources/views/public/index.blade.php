@@ -74,7 +74,7 @@
             @endif
             <div class="mt-4 flex flex-wrap gap-3 border-t border-stone-200 pt-4">
                 <button type="submit"
-                    class="rounded-full bg-stone-950 px-6 py-2.5 text-sm font-medium text-white hover:bg-stone-800">Cari</button>
+                    class="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-strong">Cari</button>
                 <a href="{{ route('properties.index') }}"
                     class="rounded-full border border-stone-300 px-6 py-2.5 text-sm font-medium hover:border-stone-950">Reset</a>
             </div>

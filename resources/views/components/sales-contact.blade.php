@@ -10,7 +10,7 @@
                 ? 'Halo, saya ingin bertanya tentang '.$listing->title.' ('.$listing->code.'): '.route('properties.show', $listing)
                 : 'Halo, saya ingin bertanya tentang properti di '.config('app.name').'.')
             <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-                <a href="https://wa.me/{{ substr($sales->whatsapp_number, 1) }}?text={{ rawurlencode($message) }}" target="_blank" rel="noopener noreferrer" class="rounded-full bg-stone-950 px-3 py-1.5 text-xs font-medium text-white hover:bg-stone-800">WhatsApp {{ $sales->name }}</a>
+                <a href="https://wa.me/{{ substr($sales->whatsapp_number, 1) }}?text={{ rawurlencode($message) }}" target="_blank" rel="noopener noreferrer" class="rounded-full bg-brand px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-strong">WhatsApp {{ $sales->name }}</a>
                 @if ($sales->contact_email)<a href="mailto:{{ $sales->contact_email }}" class="text-xs text-stone-600 underline underline-offset-2 hover:text-stone-950">Email {{ $sales->name }}</a>@endif
             </div>
         @else

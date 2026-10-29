@@ -26,7 +26,7 @@
         </div>
         <p id="mortgage-error" data-mortgage-error role="alert" hidden class="rounded-xl bg-red-50 p-3 text-sm text-red-800"></p>
         <div class="flex flex-wrap gap-3">
-            <button type="submit" class="rounded-full bg-stone-950 px-6 py-2.5 text-sm font-medium text-white hover:bg-stone-800">Hitung cicilan</button>
+            <button type="submit" class="rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-strong">Hitung cicilan</button>
             <button type="reset" class="rounded-full border border-stone-300 px-6 py-2.5 text-sm font-medium hover:border-stone-950">Reset</button>
         </div>
     </form>

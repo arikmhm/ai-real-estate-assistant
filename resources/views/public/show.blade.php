@@ -123,7 +123,7 @@
                     @if ($listing->isSold())
                         <h2 class="font-medium">Properti ini sudah terjual</h2>
                         <p class="text-sm text-stone-600">Lihat properti lain yang masih tersedia.</p>
-                        <a href="{{ route('properties.index') }}" class="inline-block rounded-full bg-stone-950 px-5 py-2.5 text-sm font-medium text-white hover:bg-stone-800">Lihat properti tersedia</a>
+                        <a href="{{ route('properties.index') }}" class="inline-block rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-strong">Lihat properti tersedia</a>
                     @else
                         <h2 class="font-medium">Hubungi sales</h2>
                         @forelse ($salesContacts as $sales)

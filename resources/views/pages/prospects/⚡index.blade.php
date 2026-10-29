@@ -27,7 +27,7 @@ new #[Title('Prospek')] class extends Component {
 
 <div class="mx-auto max-w-6xl space-y-6 p-6">
     <div class="flex flex-wrap items-start justify-between gap-3">
-        <div><flux:heading size="xl">Prospek</flux:heading><flux:text>{{ auth()->user()->isAdmin() ? 'Seluruh prospek agensi.' : 'Prospek yang Anda tangani.' }}</flux:text></div>
+        <div><flux:heading size="xl">Prospek</flux:heading><flux:text>{{ auth()->user()->isAdmin() ? 'Seluruh prospek tim.' : 'Prospek yang Anda tangani.' }}</flux:text></div>
         <flux:button variant="primary" :href="route('prospects.create')">Tambah prospek</flux:button>
     </div>
     <div class="grid gap-3 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700 md:grid-cols-3">

@@ -3,7 +3,7 @@
         <header class="space-y-1">
             <flux:heading size="xl">Dashboard</flux:heading>
             <flux:text>
-                {{ $isAdmin ? 'Ringkasan pekerjaan seluruh agensi.' : 'Ringkasan prospek dan agenda yang Anda tangani.' }}
+                {{ $isAdmin ? 'Ringkasan pekerjaan seluruh tim.' : 'Ringkasan prospek dan agenda yang Anda tangani.' }}
             </flux:text>
         </header>
 

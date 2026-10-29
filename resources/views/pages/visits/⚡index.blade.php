@@ -17,7 +17,7 @@ new #[Title('Kunjungan dan tindak lanjut')] class extends Component {
 }; ?>
 
 <div class="mx-auto max-w-6xl space-y-7 p-6">
-    <div><flux:heading size="xl">Kunjungan dan tindak lanjut</flux:heading><flux:text>{{ auth()->user()->isAdmin() ? 'Seluruh agenda agensi.' : 'Agenda prospek yang Anda tangani.' }}</flux:text></div>
+    <div><flux:heading size="xl">Kunjungan dan tindak lanjut</flux:heading><flux:text>{{ auth()->user()->isAdmin() ? 'Seluruh agenda tim.' : 'Agenda prospek yang Anda tangani.' }}</flux:text></div>
     @php($visits = Visit::with(['prospect.owner', 'listing'])->whereHas('prospect', fn ($query) => $query->visibleTo(auth()->user()))->orderByDesc('scheduled_at')->paginate(12, ['*'], 'visitsPage'))
     <section class="space-y-3">
         <flux:heading size="lg">Kunjungan</flux:heading>

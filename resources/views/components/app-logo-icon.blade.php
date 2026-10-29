@@ -1,8 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 42" {{ $attributes }}>
-    <path
-        fill="currentColor"
-        fill-rule="evenodd"
-        clip-rule="evenodd"
-        d="M17.2 5.633 8.6.855 0 5.633v26.51l16.2 9 16.2-9v-8.442l7.6-4.223V9.856l-8.6-4.777-8.6 4.777V18.3l-5.6 3.111V5.633ZM38 18.301l-5.6 3.11v-6.157l5.6-3.11V18.3Zm-1.06-7.856-5.54 3.078-5.54-3.079 5.54-3.078 5.54 3.079ZM24.8 18.3v-6.157l5.6 3.111v6.158L24.8 18.3Zm-1 1.732 5.54 3.078-13.14 7.302-5.54-3.078 13.14-7.3v-.002Zm-16.2 7.89 7.6 4.222V38.3L2 30.966V7.92l5.6 3.111v16.892ZM8.6 9.3 3.06 6.222 8.6 3.143l5.54 3.08L8.6 9.3Zm21.8 15.51-13.2 7.334V38.3l13.2-7.334v-6.156ZM9.6 11.034l5.6-3.11v14.6l-5.6 3.11v-14.6Z"
-    />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="240 125 593 680" {{ $attributes }}>
+    <path fill="#F9EC00" d="M245 800h60l333-544V158ZM587 256v544h51V256Z"/><path fill="#2A4C9A" d="m396 293 44-27 198 324v100Z"/><g stroke-width="4"><path stroke="#fff" d="M470 317l-15 9"/><path stroke="#fff" d="M492 353l-15 9"/><path stroke="#F9EC00" d="M514 389l-15 9"/><path stroke="#F9EC00" d="M536 426l-15 9"/><path stroke="#fff" d="M559 463l-15 9"/><path stroke="#fff" d="M582 501l-15 9"/><path stroke="#F9EC00" d="M607 541l-15 9"/><path stroke="#F9EC00" d="M630 579l-15 9"/></g><path fill="#2E64D6" d="M670 130a158 132 0 0 0 158 132v45H670Zm0 202h158v75H670Zm0 100h158v75H670Zm0 99h158v76H670Zm0 100h158v75H670Zm0 93h158v76H670Z"/>
 </svg>

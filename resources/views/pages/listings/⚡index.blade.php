@@ -19,7 +19,7 @@ new #[Title('Inventaris properti')] class extends Component {
     <div class="flex items-center justify-between gap-4">
         <div>
             <flux:heading size="xl">Inventaris properti</flux:heading>
-            <flux:text>Semua listing agensi, termasuk draf dan arsip.</flux:text>
+            <flux:text>Semua listing, termasuk draf dan arsip.</flux:text>
         </div>
         @can('create', Listing::class)
             <flux:button variant="primary" :href="route('listings.create')">Tambah properti</flux:button>
